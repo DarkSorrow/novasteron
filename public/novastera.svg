@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="250" height="250">
+<style>@media (prefers-color-scheme:light){:root{--color:#1E3A8A}}@media(prefers-color-scheme:dark){:root{--color:#34D399}}path{fill:var(--color);fill-opacity:1;stroke:none;stroke-width:1.11616004;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1}</style>
+<path d="m125.714 808.667-10.077 90.33 10.077-40.63 10.08 40.636zM21.808 868.658l73.188 53.892-30.147-29.042 40.23 11.59zm207.813 0-83.27 36.438 40.228-11.588-30.15 29.044zm-73.191 66.087 30.15 29.044-40.223-11.586 83.264 36.436zm-61.434.002-73.188 53.892 83.265-36.437-40.224 11.587zm40.797 23.547-10.079 40.635-10.077-40.628 10.077 90.328z" transform="translate(0 -802.362)"/>
+</svg>

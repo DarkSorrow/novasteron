@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en" class="dark-theme">
+    <head>
+        <meta charset="UTF-8"/>
+        <link rel="icon" type="image/svg+xml" href="/novastera.svg"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title>Novasteron</title>
+        <script>
+            // Apply theme from system preference as early as possible to avoid flash
+            (function() {
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                document.documentElement.classList.remove('light-theme', 'dark-theme');
+                document.documentElement.classList.add(prefersDark ? 'dark-theme' : 'light-theme');
+            })();
+        </script>
+    </head>
+    <body>
+        <div id="root"></div>
+        <script type="module" src="./index.tsx"></script>
+    </body>
+</html>

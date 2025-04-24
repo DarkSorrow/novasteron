@@ -1,0 +1,40 @@
+/* Basic CSS variables for light/dark theme in the splash screen */
+:root {
+  /* Dark theme variables (default) */
+  --background-color: #121212;
+  --text-color: #ffffff;
+  --primary-color: #34D399;
+  --accent-color: #1E3A8A;
+}
+
+/* Light theme variables */
+@media (prefers-color-scheme: light) {
+  :root {
+    --background-color: #f5f5f5;
+    --text-color: #121212;
+    --primary-color: #1E3A8A;
+    --accent-color: #34D399;
+  }
+}
+
+/* These classes will be set dynamically based on theme setting */
+.light-theme {
+  --background-color: #f5f5f5;
+  --text-color: #121212;
+  --primary-color: #1E3A8A;
+  --accent-color: #34D399;
+}
+
+.dark-theme {
+  --background-color: #121212;
+  --text-color: #ffffff;
+  --primary-color: #34D399;
+  --accent-color: #1E3A8A;
+}
+
+/* Basic styling for body - more complex styling will be handled by Material UI */
+body {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
+} 
