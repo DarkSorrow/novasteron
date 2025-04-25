@@ -28,9 +28,8 @@ contextBridge.exposeInMainWorld("splashScreen", {
   }
 });
 
-// Use Electron's native theme approach - only for getting the initial theme
-// The renderer will never change the theme via this API
-contextBridge.exposeInMainWorld("darkMode", {
-  // Get the current theme state
-  getTheme: () => ipcRenderer.invoke("dark-mode:get")
+// Expose settings API for the renderer process
+contextBridge.exposeInMainWorld("settings", {
+  // Get the current settings (theme and language)
+  getSettings: () => ipcRenderer.invoke("settings-get")
 });

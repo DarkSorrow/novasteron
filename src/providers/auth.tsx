@@ -1,7 +1,7 @@
-import { createContext, useMemo, useContext, useReducer, useEffect } from "react";
+import { createContext, useMemo, useContext, useReducer, useEffect, useCallback } from "react";
 import { useTranslation } from 'react-i18next';
 
-import { DEFAULT_LANGUAGE, SUPPORTED_LANGUAGES, RTL_LANG, LANGUAGE_LIST } from "../utils/constants";
+import { DEFAULT_LANGUAGE, RTL_LANG } from "../utils/constants";
 
 type direction = "ltr" | "rtl";
 interface AuthState {
@@ -76,57 +76,63 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     openMenu: true
   });
   
-  // Initialize theme and set up listeners for changes from Electron
+  const handleLanguageChange = useCallback((language: string) => {
+    i18n.changeLanguage(language);
+    document.documentElement.dir = RTL_LANG[language] ? 'rtl' : 'ltr';
+    document.documentElement.lang = language;
+  }, [i18n.changeLanguage]);
+
+  // Create a stable handler function for settings updates
+  const handleSettingsUpdate = useCallback((_: any, data: { theme?: string; language?: string }) => {
+    console.log('Settings updated from Electron:', data);
+    
+    // Handle theme updates if provided
+    if (data.theme) {
+      dispatch({
+        type: "SWITCH_THEME",
+        theme: data.theme
+      });
+    }
+    
+    // Handle language updates if provided
+    if (data.language) {
+      const direction = RTL_LANG[data.language] ? 'rtl' : 'ltr';
+      
+      dispatch({
+        type: "SWITCH_LANGUAGE",
+        lang: data.language,
+        langDir: direction
+      });
+      
+      handleLanguageChange(data.language);
+    }
+  }, [handleLanguageChange]);
+  
+  // Initialize settings and set up listeners for changes from Electron
   useEffect(() => {
-    // Initialize theme from Electron's native theme
-    const initThemeAndListeners = async () => {
+    const initSettingsAndListeners = async () => {
       try {
-        // INITIAL VALUE SHOULD BE THE WHOLE SETTINGS NOT JUST THEME
-        // !!!!!!!!!!!! this way it is the start and we get both language and theme at the same
-        // time. During the rest of the application lifecylce this won't be needed as a user won't be
-        // able to change both at the same time
-        // Get initial theme from Electron
-        const settings = await window.ipcRenderer.invoke('settings-get');
+        // Get initial settings from Electron
+        const settings = await window.settings.getSettings();
+        console.log('Initial settings from Electron:', settings);
         
-        // Update auth state with initial theme
-        console.log('Settings from Electron*****:', settings);
-        dispatch({
-          type: "SWITCH_SETTINGS",
-          lang: settings.language,
-          langDir: RTL_LANG[settings.language] ? 'rtl' : 'ltr',
-          theme: settings.theme
-        });
-        
-        // Also change i18n language to match
-        if (settings.language && i18n.language !== settings.language) {
-          i18n.changeLanguage(settings.language);
+        if (settings && settings.language && settings.theme) {
+          // Determine text direction based on language
+          const direction = RTL_LANG[settings.language] ? 'rtl' : 'ltr';
+          
+          // Update auth state with initial settings
+          dispatch({
+            type: "SWITCH_SETTINGS",
+            lang: settings.language,
+            langDir: direction,
+            theme: settings.theme
+          });
+          
+          // Also change i18n language to match
+          if (i18n.language !== settings.language) {
+            handleLanguageChange(settings.language);
+          }
         }
-        
-        // Handler for settings updates from the main process
-        const handleSettingsUpdate = (_: any, data: { theme?: string; language?: string }) => {
-          console.log('Settings updated from Electron:', data);
-          
-          // Handle theme updates if provided
-          if (data.theme) {
-            dispatch({
-              type: "SWITCH_THEME",
-              theme: data.theme
-            });
-          }
-          
-          // Handle language updates if provided
-          if (data.language) {
-            const direction = RTL_LANG[data.language] ? 'rtl' : 'ltr';
-            
-            dispatch({
-              type: "SWITCH_LANGUAGE",
-              lang: data.language,
-              langDir: direction
-            });
-            
-            i18n.changeLanguage(data.language);
-          }
-        };
         
         // Register the listener for the unified settings update event
         window.ipcRenderer.on('settings-updated', handleSettingsUpdate);
@@ -136,7 +142,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           window.ipcRenderer.off('settings-updated', handleSettingsUpdate);
         };
       } catch (error) {
-        console.error('Failed to initialize theme:', error);
+        console.error('Failed to initialize settings:', error);
         // Fallback to system preference for theme
         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         dispatch({
@@ -146,8 +152,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     };
     
-    void initThemeAndListeners();
-  }, [i18n]);
+    void initSettingsAndListeners();
+  }, []);
 
   const authActions: AuthContextActions = useMemo(
     () => ({

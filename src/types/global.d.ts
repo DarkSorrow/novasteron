@@ -8,14 +8,6 @@ interface Window {
   splashScreen: {
     appReady: () => void;
   };
-  darkMode: {
-    toggle: () => Promise<boolean>;
-    system: () => Promise<boolean>;
-    getTheme: () => Promise<{
-      shouldUseDarkColors: boolean;
-      themeSource: 'system' | 'light' | 'dark';
-    }>;
-  };
   settings: {
     getSettings: () => Promise<{
       theme: 'dark' | 'light' | 'system';
