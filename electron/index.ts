@@ -8,8 +8,14 @@ import i18NextMainConfig from "./localization/i18n.mainconfig.ts";
 import MenuBuilder from "./menu/menu.ts";
 import whitelist from "./localization/whitelist.ts";
 import { electronStore } from "./utils/store.ts";
+import type i18n from "i18next";
 // No longer need themeManager since we're using nativeTheme
 // import { themeManager } from "./theme/themeManager.ts";
+
+// Set application name for Windows taskbar
+if (process.platform === 'win32') {
+  app.setAppUserModelId('com.novasteron.app');
+}
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -64,11 +70,15 @@ const getTrayIconPath = () => {
   }
 };
 
-function createTray(theme: 'dark' | 'light' | 'system', language: string) {
+function createTray(
+  theme: 'dark' | 'light' | 'system',
+  language: string,
+  i18NextMainConfig: typeof i18n
+) {
   tray = new Tray(getTrayIconPath());
   const contextMenu = Menu.buildFromTemplate([
     { 
-      label: 'Open Novasteron', 
+      label: i18NextMainConfig.t('open', { name: 'Novasteron' }), 
       click: () => {
         if (win) {
           win.show();
@@ -79,7 +89,7 @@ function createTray(theme: 'dark' | 'light' | 'system', language: string) {
     },
     { type: 'separator' },
     { 
-      label: 'Quit', 
+      label: i18NextMainConfig.t('quit'), 
       click: () => {
         app.quit();
       }
@@ -143,6 +153,7 @@ function createWindow(theme: 'dark' | 'light' | 'system', language: string) {
 
   win = new BrowserWindow({
     icon: getIconPath(),
+    title: 'Novasteron',
     webPreferences: {
       preload: path.join(__dirname, "preload.mjs"),
       // For debugging
@@ -163,11 +174,10 @@ function createWindow(theme: 'dark' | 'light' | 'system', language: string) {
     if (win && !win.isDestroyed()) {
       // Send the settings event with theme information
       win.webContents.send('settings-updated', { 
-        theme: nativeTheme.shouldUseDarkColors ? 'dark' : 'light' 
+        theme: nativeTheme.themeSource
       });
     }
   });
-
 
   // Open external links in the default browser
   win.webContents.setWindowOpenHandler(({url}) => {
@@ -193,20 +203,18 @@ function createWindow(theme: 'dark' | 'light' | 'system', language: string) {
   // Set up necessary bindings to update the menu items
   // based on the current language selected
   i18NextMainConfig.on('initialized', () => {
-    console.log('i18NextMainConfig initialized - rebuilding menu');
     // Build menu once i18n is ready
     menuBuilder.buildMenu(i18NextMainConfig);
     
     // Send settings event with both theme and language
     win?.webContents.send('settings-updated', { 
       language: i18NextMainConfig.language,
-      theme: nativeTheme.shouldUseDarkColors ? 'dark' : 'light'
+      theme: nativeTheme.themeSource
     });
   });
 
   // Handle language changes
   i18NextMainConfig.on('languageChanged', (lng) => {
-    console.log(`Language changed to ${lng} - rebuilding menu`);
     if (i18NextMainConfig.isInitialized) {
       // Rebuild menu with new translations
       menuBuilder.buildMenu(i18NextMainConfig);
@@ -222,8 +230,6 @@ function createWindow(theme: 'dark' | 'light' | 'system', language: string) {
 
 // Handle app ready event from the React app
 ipcMain.on('app-ready', () => {
-  console.log('Received app-ready signal from renderer');
-  
   // Close splash screen if it exists
   if (splashScreen) {
     splashScreen.close();
@@ -259,8 +265,6 @@ app.on("activate", () => {
 });
 
 app.whenReady().then(() => {
-  console.log('*********** theme', nativeTheme.themeSource);
-  console.log('******** i18n', app.getLocale());
   let theme = electronStore.get('theme') as 'dark' | 'light' | 'system';
   let language = electronStore.get('language') as string | undefined;
   
@@ -268,7 +272,6 @@ app.whenReady().then(() => {
   if (!language) {
     const detectedLanguage = app.getLocale();
     language = whitelist.getLanguageName(detectedLanguage);
-    console.log(`Setting initial language to: ${language}`);
     electronStore.set('language', language);
     
     // Force i18next to use this language if it's already initialized
@@ -278,7 +281,6 @@ app.whenReady().then(() => {
   } else {
     // Ensure i18next is using the stored language
     if (i18NextMainConfig.isInitialized && i18NextMainConfig.language !== language) {
-      console.log(`Changing language from ${i18NextMainConfig.language} to ${language}`);
       i18NextMainConfig.changeLanguage(language);
     }
   }
@@ -286,22 +288,15 @@ app.whenReady().then(() => {
   // Initialize theme if not set
   if (!theme) {
     theme = nativeTheme.shouldUseDarkColors ? 'dark' : 'light';
-    console.log(`Setting initial theme to: ${theme}`);
     electronStore.set('theme', theme);
   } else {
-    console.log(`Setting theme source to: ${theme}`);
     nativeTheme.themeSource = theme;
   }
-  
-  console.log('*********** test', {
-    theme,
-    language
-  });
   
   // First, create and show splash screen
   createSplashScreen();
   
   // Then initialize the app window (but don't show it yet)
   createWindow(theme, language);
-  createTray(theme, language);
+  createTray(theme, language, i18NextMainConfig);
 });

@@ -29,5 +29,7 @@
     "system": "Système",
     "light": "Clair",
     "dark": "Sombre"
-  }
+  },
+  "open": "Ouvrir {{name}}",
+  "quit": "Quitter"
 }

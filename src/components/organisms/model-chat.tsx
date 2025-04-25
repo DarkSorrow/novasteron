@@ -1,21 +1,21 @@
 import {useCallback, useLayoutEffect, useRef, useEffect, useState} from "react";
 import { useTranslation } from "react-i18next";
-import {llmState} from "../state/llmState.ts";
-import {electronLlmRpc} from "../rpc/llmRpc.ts";
-import {useExternalState} from "../hooks/useExternalState.ts";
-import {SearchIconSVG} from "../icons/SearchIconSVG.tsx";
-import {StarIconSVG} from "../icons/StarIconSVG.tsx";
-import {DownloadIconSVG} from "../icons/DownloadIconSVG.tsx";
-import {Header} from "./components/Header/Header.tsx";
-import {ChatHistory} from "./components/ChatHistory/ChatHistory.tsx";
-import {InputRow} from "./components/InputRow/InputRow.tsx";
+import {llmState} from "../../state/llmState.ts";
+import {electronLlmRpc} from "../../rpc/llmRpc.ts";
+import {useExternalState} from "../../hooks/useExternalState.ts";
+import {SearchIconSVG} from "../../icons/SearchIconSVG.tsx";
+import {StarIconSVG} from "../../icons/StarIconSVG.tsx";
+import {DownloadIconSVG} from "../../icons/DownloadIconSVG.tsx";
+import {Header} from "../../App/components/Header/Header.tsx";
+import {ChatHistory} from "../../App/components/ChatHistory/ChatHistory.tsx";
+import {InputRow} from "../../App/components/InputRow/InputRow.tsx";
 
 
 // Import the minimal theme CSS
 import "./App.css";
 import Stack from "@mui/material/Stack";
 
-export const App = () => {
+export const ModelChat = () => {
 const state = useExternalState(llmState);
 const {generatingResult} = state.chatSession;
 const isScrollAnchoredRef = useRef(false);
@@ -24,18 +24,6 @@ const {t, i18n} = useTranslation();
 const [isAppReady, setIsAppReady] = useState(false);
 const appReadySentRef = useRef(false);
 // Signal that the app is ready to show once UI is fully loaded
-useEffect(() => {
-  if (isAppReady) return;
-  setIsAppReady(true);
-  // Add a small delay to ensure everything is rendered
-  setTimeout(() => {
-    if (window.splashScreen && !appReadySentRef.current) {
-      window.splashScreen.appReady();
-      console.log('App ready signal sent to main process');
-      appReadySentRef.current = true;
-    }
-  }, 500);
-}, []);
 
 const scrollToBottom = useCallback(() => {
     const newScrollTop = document.documentElement.scrollHeight - document.documentElement.clientHeight;

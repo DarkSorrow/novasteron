@@ -14,7 +14,8 @@ export function createRendererSideBirpc<
             onData(data);
         }),
         serialize: (value) => JSON.stringify(value),
-        deserialize: (value) => JSON.parse(value)
+        deserialize: (value) => JSON.parse(value),
+        timeout: 30000 // Increase timeout to 30 seconds
     });
 }
 

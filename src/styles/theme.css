@@ -1,35 +1,35 @@
 /* Basic CSS variables for light/dark theme in the splash screen */
 :root {
   /* Dark theme variables (default) */
-  --background-color: #121212;
-  --text-color: #ffffff;
-  --primary-color: #34D399;
-  --accent-color: #1E3A8A;
+  --background-color: #1E293B;
+  --text-color: #F8FAFC;
+  --primary-color: #60A5FA;
+  --accent-color: #34D399;
 }
 
 /* Light theme variables */
 @media (prefers-color-scheme: light) {
   :root {
-    --background-color: #f5f5f5;
-    --text-color: #121212;
+    --background-color: #F8FAFC;
+    --text-color: #1E293B;
     --primary-color: #1E3A8A;
-    --accent-color: #34D399;
+    --accent-color: #10B981;
   }
 }
 
 /* These classes will be set dynamically based on theme setting */
 .light-theme {
-  --background-color: #f5f5f5;
-  --text-color: #121212;
+  --background-color: #F8FAFC;
+  --text-color: #1E293B;
   --primary-color: #1E3A8A;
-  --accent-color: #34D399;
+  --accent-color: #10B981;
 }
 
 .dark-theme {
-  --background-color: #121212;
-  --text-color: #ffffff;
-  --primary-color: #34D399;
-  --accent-color: #1E3A8A;
+  --background-color: #1E293B;
+  --text-color: #F8FAFC;
+  --primary-color: #60A5FA;
+  --accent-color: #34D399;
 }
 
 /* Basic styling for body - more complex styling will be handled by Material UI */

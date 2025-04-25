@@ -36,6 +36,7 @@
     "i18next-electron-fs-backend": "^3.0.3",
     "i18next-fs-backend": "^2.6.0",
     "i18next-http-backend": "^3.0.2",
+    "keytar": "^7.9.0",
     "lifecycle-utils": "^2.0.0",
     "markdown-it": "^14.1.0",
     "node-llama-cpp": "^3.7.0",

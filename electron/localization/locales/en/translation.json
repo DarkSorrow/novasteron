@@ -29,5 +29,7 @@
     "system": "System",
     "light": "Light",
     "dark": "Dark"
-  }
+  },
+  "open": "Open {{name}}",
+  "quit": "Quit"
 }

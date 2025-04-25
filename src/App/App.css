@@ -1,14 +1,4 @@
-#root {
-    margin: 0 auto;
-    padding: 16px;
-    text-align: center;
-    width: 100%;
-    min-height: 100%;
-    align-items: center;
-    display: flex;
-    flex-direction: column;
-    box-sizing: border-box;
-}
+
 
 .app {
     display: flex;

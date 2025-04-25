@@ -14,6 +14,7 @@ import createCache from "@emotion/cache";
 import { prefixer } from "stylis";
 import rtlPlugin from "stylis-plugin-rtl";
 
+import { IndexRouting } from "./index-routing";
 import { getDesignTokens } from './styles/theme';
 import { AuthProvider, useAuth } from "./providers/auth";
 
@@ -29,7 +30,7 @@ const cacheLtr = createCache({
 });
 
 // Base application with theme and direction handling
-export const BaseApp = () => {
+export const AppWithTheme = () => {
   const { langDir, theme: themeFromAuth } = useAuth();
   
   // Use cache based on text direction (RTL or LTR)
@@ -48,7 +49,7 @@ export const BaseApp = () => {
     <CacheProvider value={emotionCache}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <App />
+        <IndexRouting />
       </ThemeProvider>
     </CacheProvider>
   );
@@ -59,7 +60,7 @@ const AppWithProviders = () => {
   return (
     <I18nextProvider i18n={i18n}>
       <AuthProvider>
-        <BaseApp />
+        <AppWithTheme />
       </AuthProvider>
     </I18nextProvider>
   );
