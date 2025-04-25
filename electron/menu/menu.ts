@@ -2,6 +2,7 @@ import { Menu, shell, BrowserWindow, MenuItemConstructorOptions, nativeTheme } f
 import * as i18nBackend from 'i18next-electron-fs-backend';
 import whitelist from '../localization/whitelist';
 import i18n from '../localization/i18n.mainconfig';
+import { electronStore } from "../utils/store";
 const isMac = process.platform === 'darwin';
 
 interface MenuBuilderInterface {
@@ -291,8 +292,9 @@ class MenuBuilder implements MenuBuilderInterface {
   // Helper method to notify renderer of theme changes
   private notifyThemeChange(): void {
     if (this.mainWindow && !this.mainWindow.isDestroyed()) {
+      electronStore.set('theme', nativeTheme.themeSource);
       this.mainWindow.webContents.send('settings-updated', { 
-        theme: nativeTheme.shouldUseDarkColors ? 'dark' : 'light' 
+        theme: nativeTheme.themeSource 
       });
     }
   }

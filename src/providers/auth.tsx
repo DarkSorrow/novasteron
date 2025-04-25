@@ -31,6 +31,12 @@ type AuthAction =
       lang: string;
       langDir: direction;
     }
+  | {
+      type: "SWITCH_SETTINGS";
+      lang: string;
+      langDir: direction;
+      theme: string;
+    }
   | { type: "SIGN_OUT" }
 
 interface AuthContextActions {
@@ -80,14 +86,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         // time. During the rest of the application lifecylce this won't be needed as a user won't be
         // able to change both at the same time
         // Get initial theme from Electron
-        const themeInfo = await window.darkMode.getTheme();
-        const initialTheme = themeInfo.shouldUseDarkColors ? 'dark' : 'light';
+        const settings = await window.ipcRenderer.invoke('settings-get');
         
         // Update auth state with initial theme
+        console.log('Settings from Electron*****:', settings);
         dispatch({
-          type: "SWITCH_THEME",
-          theme: initialTheme
+          type: "SWITCH_SETTINGS",
+          lang: settings.language,
+          langDir: RTL_LANG[settings.language] ? 'rtl' : 'ltr',
+          theme: settings.theme
         });
+        
+        // Also change i18n language to match
+        if (settings.language && i18n.language !== settings.language) {
+          i18n.changeLanguage(settings.language);
+        }
         
         // Handler for settings updates from the main process
         const handleSettingsUpdate = (_: any, data: { theme?: string; language?: string }) => {
@@ -198,6 +211,13 @@ const AuthReducer = (prevState: AuthState, action: AuthAction): AuthState => {
         ...prevState,
         lang: action.lang,
         langDir: action.langDir,
+      };
+    case "SWITCH_SETTINGS":
+      return {
+        ...prevState,
+        lang: action.lang,
+        langDir: action.langDir,
+        theme: action.theme,
       };
   }
 };

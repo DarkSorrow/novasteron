@@ -3,7 +3,7 @@ interface Window {
     on: (channel: string, listener: (...args: any[]) => void) => void;
     off: (channel: string, listener: (...args: any[]) => void) => void;
     send: (channel: string, ...args: any[]) => void;
-    invoke: <T = any>(channel: string, ...args: any[]) => Promise<T>;
+    invoke: (channel: string, ...args: any[]) => Promise<any>;
   };
   splashScreen: {
     appReady: () => void;
@@ -14,6 +14,12 @@ interface Window {
     getTheme: () => Promise<{
       shouldUseDarkColors: boolean;
       themeSource: 'system' | 'light' | 'dark';
+    }>;
+  };
+  settings: {
+    getSettings: () => Promise<{
+      theme: 'dark' | 'light' | 'system';
+      language: string;
     }>;
   };
 } 

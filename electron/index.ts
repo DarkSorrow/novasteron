@@ -64,7 +64,7 @@ const getTrayIconPath = () => {
   }
 };
 
-function createTray() {
+function createTray(theme: 'dark' | 'light' | 'system', language: string) {
   tray = new Tray(getTrayIconPath());
   const contextMenu = Menu.buildFromTemplate([
     { 
@@ -73,7 +73,7 @@ function createTray() {
         if (win) {
           win.show();
         } else {
-          createWindow();
+          createWindow(theme, language);
         }
       }
     },
@@ -95,7 +95,7 @@ function createTray() {
       if (win) {
         win.show();
       } else {
-        createWindow();
+        createWindow(theme, language);
       }
     });
   }
@@ -130,9 +130,17 @@ function createSplashScreen() {
   return splashScreen;
 }
 
-function createWindow() {
+function createWindow(theme: 'dark' | 'light' | 'system', language: string) {
   // Create the main window but don't show it yet
   // It will only be shown after receiving the 'app-ready' signal from the renderer
+  // Handler to get the current system theme
+  ipcMain.handle('settings-get', () => {
+    return {
+      theme: theme,
+      language: language
+    };
+  });
+
   win = new BrowserWindow({
     icon: getIconPath(),
     webPreferences: {
@@ -160,13 +168,6 @@ function createWindow() {
     }
   });
 
-  // Handler to get the current system theme
-  ipcMain.handle('dark-mode:get', () => {
-    return {
-      shouldUseDarkColors: nativeTheme.shouldUseDarkColors,
-      themeSource: nativeTheme.themeSource
-    };
-  });
 
   // Open external links in the default browser
   win.webContents.setWindowOpenHandler(({url}) => {
@@ -209,7 +210,7 @@ function createWindow() {
     if (i18NextMainConfig.isInitialized) {
       // Rebuild menu with new translations
       menuBuilder.buildMenu(i18NextMainConfig);
-      
+      electronStore.set('language', lng);
       // Send settings event with language change
       win?.webContents.send('settings-updated', { language: lng });
     }
@@ -251,23 +252,47 @@ app.on("activate", () => {
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   if (BrowserWindow.getAllWindows().length === 0) {
-    createWindow();
+    const theme = electronStore.get('theme') as 'dark' | 'light' | 'system';
+    const language = electronStore.get('language') as string | undefined ?? 'en';
+    createWindow(theme, language);
   }
 });
 
 app.whenReady().then(() => {
   console.log('*********** theme', nativeTheme.themeSource);
   console.log('******** i18n', app.getLocale());
-  const theme = electronStore.get('theme') as 'dark' | 'light' | 'system';
-  const language = electronStore.get('language');
+  let theme = electronStore.get('theme') as 'dark' | 'light' | 'system';
+  let language = electronStore.get('language') as string | undefined;
+  
+  // Initialize language if not set
   if (!language) {
-    const languages = app.getLocale();
-    electronStore.set('language', whitelist.getLanguageName(Array.isArray(languages) ? languages[0] : languages));
+    const detectedLanguage = app.getLocale();
+    language = whitelist.getLanguageName(detectedLanguage);
+    console.log(`Setting initial language to: ${language}`);
+    electronStore.set('language', language);
+    
+    // Force i18next to use this language if it's already initialized
+    if (i18NextMainConfig.isInitialized && i18NextMainConfig.language !== language) {
+      i18NextMainConfig.changeLanguage(language);
+    }
+  } else {
+    // Ensure i18next is using the stored language
+    if (i18NextMainConfig.isInitialized && i18NextMainConfig.language !== language) {
+      console.log(`Changing language from ${i18NextMainConfig.language} to ${language}`);
+      i18NextMainConfig.changeLanguage(language);
+    }
   }
+  
+  // Initialize theme if not set
   if (!theme) {
-    const theme = nativeTheme.shouldUseDarkColors ? 'dark' : 'light';
+    theme = nativeTheme.shouldUseDarkColors ? 'dark' : 'light';
+    console.log(`Setting initial theme to: ${theme}`);
     electronStore.set('theme', theme);
+  } else {
+    console.log(`Setting theme source to: ${theme}`);
+    nativeTheme.themeSource = theme;
   }
+  
   console.log('*********** test', {
     theme,
     language
@@ -277,6 +302,6 @@ app.whenReady().then(() => {
   createSplashScreen();
   
   // Then initialize the app window (but don't show it yet)
-  createWindow();
-  createTray();
+  createWindow(theme, language);
+  createTray(theme, language);
 });
