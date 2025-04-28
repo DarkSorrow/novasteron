@@ -1,7 +1,7 @@
-import {ipcRenderer, contextBridge, IpcRendererEvent} from "electron";
+import { ipcRenderer, contextBridge, IpcRendererEvent } from 'electron';
 
 // --------- Expose some API to the Renderer process ---------
-contextBridge.exposeInMainWorld("ipcRenderer", {
+contextBridge.exposeInMainWorld('ipcRenderer', {
   on(...args: Parameters<typeof ipcRenderer.on>) {
     const [channel, listener] = args;
     return ipcRenderer.on(channel, (event, ...args) => listener(event, ...args));
@@ -17,19 +17,19 @@ contextBridge.exposeInMainWorld("ipcRenderer", {
   invoke(...args: Parameters<typeof ipcRenderer.invoke>) {
     const [channel, ...omit] = args;
     return ipcRenderer.invoke(channel, ...omit);
-  }
+  },
 });
 
 // Expose specific API functions for the splash screen
-contextBridge.exposeInMainWorld("splashScreen", {
+contextBridge.exposeInMainWorld('splashScreen', {
   // Signal that the app is ready to show the main window
   appReady: () => {
-    ipcRenderer.send("app-ready");
-  }
+    ipcRenderer.send('app-ready');
+  },
 });
 
 // Expose settings API for the renderer process
-contextBridge.exposeInMainWorld("settings", {
+contextBridge.exposeInMainWorld('settings', {
   // Get the current settings (theme and language)
-  getSettings: () => ipcRenderer.invoke("settings-get")
+  getSettings: () => ipcRenderer.invoke('settings-get'),
 });

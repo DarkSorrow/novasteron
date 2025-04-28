@@ -1,8 +1,8 @@
-import i18n from "i18next";
-import { initReactI18next } from "react-i18next";
-import Backend from "i18next-http-backend";
+import i18n from 'i18next';
+import { initReactI18next } from 'react-i18next';
+import Backend from 'i18next-http-backend';
 
-import { DEFAULT_LANGUAGE, SUPPORTED_LANGUAGES } from "./constants";
+import { DEFAULT_LANGUAGE, SUPPORTED_LANGUAGES } from './constants';
 // Change to check cookies, url language and then browser language
 i18n
   // load translation using http -> see /public/locales (i.e. https://github.com/i18next/react-i18next/tree/master/example/react/public/locales)
@@ -16,15 +16,15 @@ i18n
     ns: ['translation'],
     defaultNS: 'translation',
     backend: {
-      loadPath: '/locales/{{lng}}/{{ns}}.json'
+      loadPath: '/locales/{{lng}}/{{ns}}.json',
     },
     fallbackLng: DEFAULT_LANGUAGE,
-    debug: process.env.NODE_ENV !== "production",
+    debug: process.env.NODE_ENV !== 'production',
     supportedLngs: SUPPORTED_LANGUAGES,
-    load: "currentOnly",
+    load: 'currentOnly',
   });
 
 // NOTE: The IPC listener has been moved to the AuthProvider
 // This helps centralize language state management
 
-export default i18n; 
+export default i18n;

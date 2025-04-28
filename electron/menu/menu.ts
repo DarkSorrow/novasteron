@@ -2,7 +2,7 @@ import { Menu, shell, BrowserWindow, MenuItemConstructorOptions, nativeTheme } f
 import * as i18nBackend from 'i18next-electron-fs-backend';
 import whitelist from '../localization/whitelist';
 import i18n from '../localization/i18n.mainconfig';
-import { electronStore } from "../utils/store";
+import { electronStore } from '../utils/store';
 const isMac = process.platform === 'darwin';
 
 interface MenuBuilderInterface {
@@ -30,45 +30,45 @@ class MenuBuilder implements MenuBuilderInterface {
     return [
       // { role: "appMenu" }
       ...(isMac
-        ? [
+        ? ([
             {
               label: this.appName,
               submenu: [
                 {
                   role: 'about',
-                  label: i18nextMainBackend.t('About')
+                  label: i18nextMainBackend.t('About'),
                 },
                 {
-                  type: 'separator'
+                  type: 'separator',
                 },
                 {
-                  type: 'separator'
+                  type: 'separator',
                 },
                 {
                   role: 'hide',
-                  label: i18nextMainBackend.t('Hide')
+                  label: i18nextMainBackend.t('Hide'),
                 },
                 {
                   role: 'hideothers',
-                  label: i18nextMainBackend.t('Hide Others')
+                  label: i18nextMainBackend.t('Hide Others'),
                 },
                 {
                   role: 'unhide',
-                  label: i18nextMainBackend.t('Unhide')
+                  label: i18nextMainBackend.t('Unhide'),
                 },
                 {
-                  type: 'separator'
+                  type: 'separator',
                 },
                 {
                   role: 'quit',
-                  label: i18nextMainBackend.t('Quit')
+                  label: i18nextMainBackend.t('Quit'),
                 },
                 {
-                  type: 'separator'
-                }
-              ]
-            }
-          ] as MenuItemConstructorOptions[]
+                  type: 'separator',
+                },
+              ],
+            },
+          ] as MenuItemConstructorOptions[])
         : []),
       // { role: "fileMenu" }
       {
@@ -77,13 +77,13 @@ class MenuBuilder implements MenuBuilderInterface {
           isMac
             ? {
                 role: 'close',
-                label: i18nextMainBackend.t('Quit')
+                label: i18nextMainBackend.t('Quit'),
               }
             : {
                 role: 'quit',
-                label: i18nextMainBackend.t('Exit')
-              }
-        ] as MenuItemConstructorOptions[]
+                label: i18nextMainBackend.t('Exit'),
+              },
+        ] as MenuItemConstructorOptions[],
       },
       // { role: "editMenu" }
       {
@@ -91,72 +91,72 @@ class MenuBuilder implements MenuBuilderInterface {
         submenu: [
           {
             role: 'undo',
-            label: i18nextMainBackend.t('Undo')
+            label: i18nextMainBackend.t('Undo'),
           },
           {
             role: 'redo',
-            label: i18nextMainBackend.t('Redo')
+            label: i18nextMainBackend.t('Redo'),
           },
           {
-            type: 'separator'
+            type: 'separator',
           },
           {
             role: 'cut',
-            label: i18nextMainBackend.t('Cut')
+            label: i18nextMainBackend.t('Cut'),
           },
           {
             role: 'copy',
-            label: i18nextMainBackend.t('Copy')
+            label: i18nextMainBackend.t('Copy'),
           },
           {
             role: 'paste',
-            label: i18nextMainBackend.t('Paste')
+            label: i18nextMainBackend.t('Paste'),
           },
           ...(isMac
-            ? [
+            ? ([
                 {
                   role: 'pasteAndMatchStyle',
-                  label: i18nextMainBackend.t('Paste and Match Style')
+                  label: i18nextMainBackend.t('Paste and Match Style'),
                 },
                 {
                   role: 'delete',
-                  label: i18nextMainBackend.t('Delete')
+                  label: i18nextMainBackend.t('Delete'),
                 },
                 {
                   role: 'selectAll',
-                  label: i18nextMainBackend.t('Select All')
+                  label: i18nextMainBackend.t('Select All'),
                 },
                 {
-                  type: 'separator'
+                  type: 'separator',
                 },
                 {
                   label: i18nextMainBackend.t('Speech'),
                   submenu: [
                     {
                       role: 'startSpeaking',
-                      label: i18nextMainBackend.t('Start Speaking')
+                      label: i18nextMainBackend.t('Start Speaking'),
                     },
                     {
                       role: 'stopSpeaking',
-                      label: i18nextMainBackend.t('Stop Speaking')
-                    }
-                  ] as MenuItemConstructorOptions[]
-                }
-              ] as MenuItemConstructorOptions[]
-            : [
+                      label: i18nextMainBackend.t('Stop Speaking'),
+                    },
+                  ] as MenuItemConstructorOptions[],
+                },
+              ] as MenuItemConstructorOptions[])
+            : ([
                 {
                   role: 'delete',
-                  label: i18nextMainBackend.t('Delete')
+                  label: i18nextMainBackend.t('Delete'),
                 },
                 {
-                  type: 'separator'
+                  type: 'separator',
                 },
                 {
                   role: 'selectAll',
-                  label: i18nextMainBackend.t('Select All')
-                }
-              ] as MenuItemConstructorOptions[])
-        ] as MenuItemConstructorOptions[]
+                  label: i18nextMainBackend.t('Select All'),
+                },
+              ] as MenuItemConstructorOptions[])),
+        ] as MenuItemConstructorOptions[],
       },
       // { role: "viewMenu" }
       {
@@ -164,44 +164,47 @@ class MenuBuilder implements MenuBuilderInterface {
         submenu: [
           {
             role: 'reload',
-            label: i18nextMainBackend.t('Reload')
+            label: i18nextMainBackend.t('Reload'),
           },
           {
             role: 'forceReload',
-            label: i18nextMainBackend.t('Force Reload')
+            label: i18nextMainBackend.t('Force Reload'),
           },
           {
             role: 'toggleDevTools',
-            label: i18nextMainBackend.t('Toggle Developer Tools')
+            label: i18nextMainBackend.t('Toggle Developer Tools'),
           },
           {
-            type: 'separator'
+            type: 'separator',
           },
           {
             role: 'resetZoom',
-            label: i18nextMainBackend.t('Reset Zoom')
+            label: i18nextMainBackend.t('Reset Zoom'),
           },
           {
             role: 'zoomIn',
-            label: i18nextMainBackend.t('Zoom In')
+            label: i18nextMainBackend.t('Zoom In'),
           },
           {
             role: 'zoomOut',
-            label: i18nextMainBackend.t('Zoom Out')
+            label: i18nextMainBackend.t('Zoom Out'),
           },
           {
-            type: 'separator'
+            type: 'separator',
           },
           {
             role: 'togglefullscreen',
-            label: i18nextMainBackend.t('Toggle Fullscreen')
-          }
-        ] as MenuItemConstructorOptions[]
+            label: i18nextMainBackend.t('Toggle Fullscreen'),
+          },
+        ] as MenuItemConstructorOptions[],
       },
       // language menu
       {
         label: i18nextMainBackend.t('Language'),
-        submenu: whitelist.buildSubmenu(i18nBackend.changeLanguageRequest, i18nextMainBackend) as MenuItemConstructorOptions[]
+        submenu: whitelist.buildSubmenu(
+          i18nBackend.changeLanguageRequest,
+          i18nextMainBackend
+        ) as MenuItemConstructorOptions[],
       },
       // Theme preference menu using nativeTheme directly
       {
@@ -214,7 +217,7 @@ class MenuBuilder implements MenuBuilderInterface {
             click: () => {
               nativeTheme.themeSource = 'system';
               this.notifyThemeChange();
-            }
+            },
           },
           {
             label: i18nextMainBackend.t('theme.light'),
@@ -223,7 +226,7 @@ class MenuBuilder implements MenuBuilderInterface {
             click: () => {
               nativeTheme.themeSource = 'light';
               this.notifyThemeChange();
-            }
+            },
           },
           {
             label: i18nextMainBackend.t('theme.dark'),
@@ -232,9 +235,9 @@ class MenuBuilder implements MenuBuilderInterface {
             click: () => {
               nativeTheme.themeSource = 'dark';
               this.notifyThemeChange();
-            }
-          }
-        ]
+            },
+          },
+        ],
       },
       // { role: "windowMenu" }
       {
@@ -242,36 +245,36 @@ class MenuBuilder implements MenuBuilderInterface {
         submenu: [
           {
             role: 'minimize',
-            label: i18nextMainBackend.t('Minimize')
+            label: i18nextMainBackend.t('Minimize'),
           },
           {
             role: 'zoom',
-            label: i18nextMainBackend.t('Zoom')
+            label: i18nextMainBackend.t('Zoom'),
           },
           ...(isMac
-            ? [
+            ? ([
                 {
-                  type: 'separator'
+                  type: 'separator',
                 },
                 {
                   role: 'front',
-                  label: i18nextMainBackend.t('Front')
+                  label: i18nextMainBackend.t('Front'),
                 },
                 {
-                  type: 'separator'
+                  type: 'separator',
                 },
                 {
                   role: 'window',
-                  label: i18nextMainBackend.t('Window')
-                }
-              ] as MenuItemConstructorOptions[]
-            : [
+                  label: i18nextMainBackend.t('Window'),
+                },
+              ] as MenuItemConstructorOptions[])
+            : ([
                 {
                   role: 'close',
-                  label: i18nextMainBackend.t('Close')
-                }
-              ] as MenuItemConstructorOptions[])
-        ] as MenuItemConstructorOptions[]
+                  label: i18nextMainBackend.t('Close'),
+                },
+              ] as MenuItemConstructorOptions[])),
+        ] as MenuItemConstructorOptions[],
       },
       // help menu
       {
@@ -282,10 +285,10 @@ class MenuBuilder implements MenuBuilderInterface {
             label: i18nextMainBackend.t('Learn More'),
             click: async () => {
               await shell.openExternal('https://electronjs.org');
-            }
-          }
-        ]
-      }
+            },
+          },
+        ],
+      },
     ];
   }
 
@@ -293,8 +296,8 @@ class MenuBuilder implements MenuBuilderInterface {
   private notifyThemeChange(): void {
     if (this.mainWindow && !this.mainWindow.isDestroyed()) {
       electronStore.set('theme', nativeTheme.themeSource);
-      this.mainWindow.webContents.send('settings-updated', { 
-        theme: nativeTheme.themeSource 
+      this.mainWindow.webContents.send('settings-updated', {
+        theme: nativeTheme.themeSource,
       });
     }
   }

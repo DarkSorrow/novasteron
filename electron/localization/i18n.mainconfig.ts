@@ -16,19 +16,19 @@ const prependPath = isMac && !isDev ? path.join(process.resourcesPath, '..') : '
 i18next.use(Backend).init({
   backend: {
     loadPath: prependPath + '/electron/localization/locales/{{lng}}/{{ns}}.json',
-    addPath: prependPath + '/electron/localization/locales/{{lng}}/{{ns}}.missing.json'
-  },  
+    addPath: prependPath + '/electron/localization/locales/{{lng}}/{{ns}}.missing.json',
+  },
   debug: true, // Enable debug to see more information
-  defaultNS: "translation",
+  defaultNS: 'translation',
   saveMissing: true, // Save missing translations to help identify issues
   lng: whitelist.getLanguageName(electronStore.get('language', app.getLocale()) as string),
   fallbackLng: 'en', // Set fallback to ensure something displays
   supportedLngs: whitelist.langs,
-  initImmediate: false // This can help ensure synchronous loading of resources
+  initImmediate: false, // This can help ensure synchronous loading of resources
 });
 
 // Handle initialization success
-i18next.on('initialized', (options) => {
+i18next.on('initialized', options => {
   console.log('i18next initialized with language:', i18next.language);
   console.log('Available resources:', Object.keys(i18next.services.resourceStore.data));
 });

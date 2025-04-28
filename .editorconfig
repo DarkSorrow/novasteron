@@ -3,12 +3,18 @@ root = true
 [*]
 indent_style = space
 indent_size = 2
-
-[{*.ts,*.tsx,*.js,*.jsx,*.css,*.scss}]
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
 insert_final_newline = true
 
-[{package.json,package-lock.json,manifest.json,electron-builder.json5}]
+[*.{js,jsx,ts,tsx}]
+indent_style = space
 indent_size = 2
 
-[*.yml]
+[*.{json,yml,yaml}]
+indent_style = space
 indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false

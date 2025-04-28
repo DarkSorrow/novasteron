@@ -12,16 +12,16 @@ const lightPalette: PaletteOptions = {
   },
   background: {
     default: '#F8FAFC', // Light grayish background
-    paper: '#FFFFFF',   // White for cards and containers
+    paper: '#FFFFFF', // White for cards and containers
   },
   text: {
     primary: '#1E293B', // Dark gray for primary text
     secondary: '#475569', // Lighter gray for secondary text
   },
-  divider: '#E2E8F0',   // Subtle gray for dividers
+  divider: '#E2E8F0', // Subtle gray for dividers
   action: {
-    active: '#475569',   // Active state
-    hover: '#F0FDF4',    // Light teal hover for primary interactions
+    active: '#475569', // Active state
+    hover: '#F0FDF4', // Light teal hover for primary interactions
   },
 };
 
@@ -35,31 +35,34 @@ const darkPalette: PaletteOptions = {
   },
   background: {
     default: '#1E293B', // Deep blue-gray for the main background
-    paper: '#111827',   // Darker shade for cards
+    paper: '#111827', // Darker shade for cards
   },
   text: {
     primary: '#F8FAFC', // White text for readability on dark backgrounds
     secondary: '#CBD5E1', // Light gray for secondary text
   },
-  divider: '#334155',   // Darker gray for dividers to reduce contrast
+  divider: '#334155', // Darker gray for dividers to reduce contrast
   action: {
-    active: '#10B981',   // Teal-green active state
-    hover: '#1E3A8A',    // Deep navy hover for interactions
+    active: '#10B981', // Teal-green active state
+    hover: '#1E3A8A', // Deep navy hover for interactions
   },
-}
+};
 
-export const getDesignTokens = (mode: PaletteMode, dir: "ltr" | "rtl") : ThemeOptions => ({
+export const getDesignTokens = (mode: PaletteMode, dir: 'ltr' | 'rtl'): ThemeOptions => ({
   direction: dir,
-  palette: (mode === 'dark') ? darkPalette : lightPalette,
+  palette: mode === 'dark' ? darkPalette : lightPalette,
   components: {
     MuiCssBaseline: {
       styleOverrides: {
-        body: (mode === 'dark') ? darkScrollbar() : darkScrollbar({
-          track: '#f1f1f1',
-          thumb: '#c1c1c1',
-          active: '#a6a6a6',
-        }),
-      }
-    }
-  }
+        body:
+          mode === 'dark'
+            ? darkScrollbar()
+            : darkScrollbar({
+                track: '#f1f1f1',
+                thumb: '#c1c1c1',
+                active: '#a6a6a6',
+              }),
+      },
+    },
+  },
 });

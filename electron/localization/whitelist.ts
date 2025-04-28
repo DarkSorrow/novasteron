@@ -47,7 +47,7 @@ const whitelistMap: Record<string, string> = {
   // tr: 'Türk', // Turkish
   // uk: 'Українська', // Ukranian
   // vi: 'Tiếng Việt', // Vietnamese
-  zh_CN: '简体中文' // Chinese
+  zh_CN: '简体中文', // Chinese
 };
 
 const whitelist = (function () {
@@ -55,13 +55,13 @@ const whitelist = (function () {
   const clickFunction = function (channel: string, lng: string, i18nextMainBackend: any) {
     return function (menuItem: any, browserWindow: any, event: any) {
       console.log(`Language change requested: ${lng}`);
-      
+
       // Make sure we're not changing to the same language
       if (i18nextMainBackend.language === lng) {
         console.log(`Already using language: ${lng}`);
         return;
       }
-      
+
       // Change the language in i18next
       console.log(`Changing language from ${i18nextMainBackend.language} to ${lng}`);
       i18nextMainBackend.changeLanguage(lng);
@@ -88,7 +88,7 @@ const whitelist = (function () {
           label: whitelistMap[key],
           type: 'radio',
           checked: i18nextMainBackend.language === key,
-          click: clickFunction(channel, key, i18nextMainBackend)
+          click: clickFunction(channel, key, i18nextMainBackend),
         });
       }
 
@@ -96,14 +96,14 @@ const whitelist = (function () {
     },
     // A helper method to get language names for UI display
     // it should parse the appLocale value taken from ['fr-FR'] for example
-    getLanguageName: function(code?: string): string {
+    getLanguageName: function (code?: string): string {
       console.log('*********** getLanguageName', code);
       if (!code) return 'en';
       if (whitelistMap[code]) return code;
       const localCode = code.split('-')[0];
       if (!localCode) return 'en';
       return whitelistMap[localCode] ? localCode : 'en';
-    }
+    },
   };
 })();
 

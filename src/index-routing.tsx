@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { HashRouter as Router, Routes, Route } from "react-router-dom";
+import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import Backdrop from '@mui/material/Backdrop';
 import CircularProgress from '@mui/material/CircularProgress';
 
@@ -12,18 +12,15 @@ export const IndexRouting = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Home />} >
+        <Route path="/" element={<Home />}>
           <Route index element={<Model />} />
           <Route path="/profile" element={<Profile />} />
-          <Route
-            path="*"
-            element={<NotFound />}
-          />
+          <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
     </Router>
-  )
-}
+  );
+};
 /*
    - index has the full page []
       - model as the index

@@ -14,4 +14,4 @@ interface Window {
       language: string;
     }>;
   };
-} 
+}

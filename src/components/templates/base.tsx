@@ -1,5 +1,4 @@
-import Box from "@mui/material/Box";
-
+import Box from '@mui/material/Box';
 
 interface BaseProps {
   sideBar: React.ReactNode;
@@ -15,4 +14,4 @@ export const Base = ({ sideBar, header, children }: BaseProps) => {
       {children}
     </Box>
   );
-}
+};
