@@ -1,0 +1,17 @@
+{
+  "nav": {
+    "home": "Inicio",
+    "addModel": "Agregar modelo",
+    "ejectModel": "Expulsar modelo",
+    "configureModel": "Configurar modelo"
+  },
+  "model": {
+    "loading": "Cargando modelo..."
+  },
+  "error": {
+    "general": "Ocurrió un error",
+    "noDetails": "No hay detalles disponibles sobre el error en este momento.",
+    "Model": "Ocurrió un error al cargar el modelo"
+  },
+  "*": "{{message}}"
+}

@@ -1,5 +1,17 @@
 {
   "nav": {
-    "home": "Accueil"
-  }
+    "home": "Accueil",
+    "addModel": "Ajouter un modèle",
+    "ejectModel": "Éjecter le modèle",
+    "configureModel": "Configurer le modèle"
+  },
+  "model": {
+    "loading": "Chargement du modèle..."
+  },
+  "error": {
+    "general": "Une erreur est survenue",
+    "noDetails": "Aucun détail disponible sur l'erreur pour le moment.",
+    "Model": "Une erreur est survenue lors du chargement du modèle"
+  },
+  "*": "{{message}}"
 }

@@ -1,15 +1,17 @@
-import { ButtonBase } from '@mui/material';
-import SmartToyIcon from '@mui/icons-material/SmartToy';
+import { ButtonBase, Tooltip } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
-interface ButtonModelProps {
-  imageUrl?: string;
+import { useAuth } from '../../providers/auth';
+
+export interface ButtonModelProps {
   onClick?: () => void;
   isActive?: boolean;
+  name?: string;
+  children: React.ReactNode;
+  position?: 'left' | 'right';
 }
 
 const StyledButton = styled(ButtonBase)(({ theme }) => ({
-  minWidth: '48px',
   width: '48px',
   height: '48px',
   borderRadius: '12px',
@@ -37,8 +39,8 @@ const ActiveButton = styled(StyledButton)(({ theme }) => ({
 }));
 
 const ButtonContent = styled('div')({
-  width: '100%',
-  height: '100%',
+  width: '48px',
+  height: '48px',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -46,24 +48,21 @@ const ButtonContent = styled('div')({
   borderRadius: 'inherit',
 });
 
-const ButtonImage = styled('img')({
-  width: '100%',
-  height: '100%',
-  objectFit: 'cover',
-});
-
-export const ButtonModel = ({ imageUrl, onClick, isActive = false }: ButtonModelProps) => {
+export const ButtonModel = ({ onClick, isActive = false, name, children, position }: ButtonModelProps) => {
+  const { langDir } = useAuth();
   const ButtonComponent = isActive ? ActiveButton : StyledButton;
 
   return (
-    <ButtonComponent onClick={onClick}>
-      <ButtonContent>
-        {imageUrl ? (
-          <ButtonImage src={imageUrl} alt="Model" />
-        ) : (
-          <SmartToyIcon sx={{ fontSize: 24 }} />
-        )}
-      </ButtonContent>
-    </ButtonComponent>
+    <Tooltip
+      title={name || ''}
+      placement={position}
+      arrow
+    >
+      <ButtonComponent onClick={onClick}>
+        <ButtonContent>
+          {children}
+        </ButtonContent>
+      </ButtonComponent>
+    </Tooltip>
   );
 };

@@ -27,3 +27,5 @@ export const RTL_LANG: Record<string, boolean> = {
 };
 
 export const SUPPORTED_LANGUAGES: string[] = Object.keys(LANGUAGE_LIST);
+
+export const USER_PROFILE_HEIGHT = 80;
