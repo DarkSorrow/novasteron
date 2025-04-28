@@ -1,5 +1,8 @@
 import { createContext, useMemo, useContext, useReducer, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useExternalState } from '../hooks/useExternalState';
+import { llmState } from '../state/llmState';
+import { electronLlmRpc } from '../rpc/llmRpc';
 
 import { DEFAULT_LANGUAGE, RTL_LANG } from '../utils/constants';
 
@@ -13,6 +16,11 @@ interface AuthState {
   theme: string;
   langDir: direction;
   openMenu: boolean;
+  // Model related state
+  selectedModel: string | null;
+  models: any[];
+  isLoading: boolean;
+  modelError: Error | null;
 }
 
 type AuthAction =
@@ -37,17 +45,23 @@ type AuthAction =
       langDir: direction;
       theme: string;
     }
-  | { type: 'SIGN_OUT' };
+  | { type: 'SIGN_OUT' }
+  | { type: 'LOAD_MODEL'; modelId: string }
+  | { type: 'SET_MODELS'; models: any[] }
+  | { type: 'SET_MODEL_ERROR'; error: Error | null };
 
 interface AuthContextActions {
   signIn: (accessToken: any) => void;
   signOut: () => void;
+  loadModel: (modelId: string) => Promise<void>;
+  addNewModel: () => Promise<void>;
 }
 
 interface AuthContextType extends AuthState, AuthContextActions {}
 
 // Constants for localStorage keys
 const STORAGE_TOKEN = 'auth_token';
+const STORAGE_MODELS = 'user_models';
 
 const AuthContext = createContext<AuthContextType>({
   status: 'idle',
@@ -58,13 +72,20 @@ const AuthContext = createContext<AuthContextType>({
   lang: DEFAULT_LANGUAGE,
   langDir: 'ltr',
   openMenu: true,
+  selectedModel: null,
+  models: [],
+  isLoading: false,
+  modelError: null,
   signIn: () => {},
   signOut: () => {},
+  loadModel: async () => {},
+  addNewModel: async () => {},
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const { i18n } = useTranslation();
-  // Initial state with synchronous initialization
+  const llmExternalState = useExternalState(llmState);
+
   const [state, dispatch] = useReducer(AuthReducer, {
     status: 'idle',
     userToken: null,
@@ -74,6 +95,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     theme: 'system',
     langDir: 'ltr',
     openMenu: true,
+    selectedModel: null,
+    models: [],
+    isLoading: false,
+    modelError: null,
   });
 
   const handleLanguageChange = useCallback(
@@ -155,11 +180,33 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           type: 'SWITCH_THEME',
           theme: prefersDark ? 'dark' : 'light',
         });
+        return;
       }
     };
 
     void initSettingsAndListeners();
   }, []);
+
+  const loadModel = useCallback(async (modelId: string) => {
+    try {
+      dispatch({ type: 'LOAD_MODEL', modelId });
+      await electronLlmRpc.selectModelFileAndLoad();
+    } catch (error) {
+      console.warn('Failed to load model:', error);
+      dispatch({ type: 'SET_MODEL_ERROR', error: error as Error });
+    }
+  }, [state.models]);
+
+  const addNewModel = useCallback(async () => {
+    try {
+      await electronLlmRpc.selectModelFileAndLoad();
+      const updatedModels = [...state.models];
+      dispatch({ type: 'SET_MODELS', models: updatedModels });
+    } catch (error) {
+      console.warn('Failed to add model:', error);
+      dispatch({ type: 'SET_MODEL_ERROR', error: error as Error });
+    }
+  }, [state.models]);
 
   const authActions: AuthContextActions = useMemo(
     () => ({
@@ -189,12 +236,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         localStorage.removeItem(STORAGE_TOKEN);
         dispatch({ type: 'SIGN_OUT' });
       },
+      loadModel,
+      addNewModel,
     }),
-    []
+    [loadModel, addNewModel]
   );
 
   return (
-    <AuthContext.Provider value={{ ...state, ...authActions }}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={{ ...state, ...authActions }}>
+      {children}
+    </AuthContext.Provider>
   );
 };
 
@@ -213,6 +264,8 @@ const AuthReducer = (prevState: AuthState, action: AuthAction): AuthState => {
         ...prevState,
         status: 'signOut',
         userToken: null,
+        selectedModel: null,
+        models: [],
       };
     case 'SWITCH_THEME':
       return {
@@ -232,6 +285,28 @@ const AuthReducer = (prevState: AuthState, action: AuthAction): AuthState => {
         langDir: action.langDir,
         theme: action.theme,
       };
+    case 'LOAD_MODEL':
+      return {
+        ...prevState,
+        selectedModel: action.modelId,
+        isLoading: true,
+        modelError: null,
+      };
+    case 'SET_MODELS':
+      localStorage.setItem(STORAGE_MODELS, JSON.stringify(action.models));
+      return {
+        ...prevState,
+        models: action.models,
+        isLoading: false,
+      };
+    case 'SET_MODEL_ERROR':
+      return {
+        ...prevState,
+        modelError: action.error,
+        isLoading: false,
+      };
+    default:
+      return prevState;
   }
 };
 

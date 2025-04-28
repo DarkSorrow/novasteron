@@ -2,6 +2,15 @@ import type {} from '@mui/x-date-pickers/themeAugmentation';
 import { PaletteMode, ThemeOptions, PaletteOptions } from '@mui/material';
 import darkScrollbar from '@mui/material/darkScrollbar';
 
+declare module '@mui/material/styles' {
+  interface Palette {
+    subtleDivider: string;
+  }
+  interface PaletteOptions {
+    subtleDivider: string;
+  }
+}
+
 const lightPalette: PaletteOptions = {
   mode: 'light',
   primary: {
@@ -19,6 +28,7 @@ const lightPalette: PaletteOptions = {
     secondary: '#475569', // Lighter gray for secondary text
   },
   divider: '#E2E8F0', // Subtle gray for dividers
+  subtleDivider: 'rgba(226, 232, 240, 0.5)', // More subtle divider with transparency
   action: {
     active: '#475569', // Active state
     hover: '#F0FDF4', // Light teal hover for primary interactions
@@ -42,6 +52,7 @@ const darkPalette: PaletteOptions = {
     secondary: '#CBD5E1', // Light gray for secondary text
   },
   divider: '#334155', // Darker gray for dividers to reduce contrast
+  subtleDivider: 'rgba(51, 65, 85, 0.5)', // More subtle divider with transparency
   action: {
     active: '#10B981', // Teal-green active state
     hover: '#1E3A8A', // Deep navy hover for interactions

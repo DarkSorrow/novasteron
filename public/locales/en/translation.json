@@ -1,5 +1,17 @@
 {
   "nav": {
-    "home": "Home"
-  }
+    "home": "Home",
+    "addModel": "Add Model",
+    "ejectModel": "Eject Model",
+    "configureModel": "Configure Model"
+  },
+  "model": {
+    "loading": "Loading model..."
+  },
+  "error": {
+    "general": "An error occurred",
+    "noDetails": "No details available on the error at the moment.",
+    "Model": "An error occurred while loading the model"
+  },
+  "*": "{{message}}"
 }

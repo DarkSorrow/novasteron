@@ -5,15 +5,17 @@ import CircularProgress from '@mui/material/CircularProgress';
 
 import { Home } from './components/pages/home';
 import { Profile } from './components/pages/profile';
-import { Model } from './components/pages/model';
+import { HomeModel } from './components/pages/home-model';
 import { NotFound } from './components/pages/not-found';
+import { HomeModelConfig } from './components/pages/home-model-config';
 
 export const IndexRouting = () => {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Home />}>
-          <Route index element={<Model />} />
+          <Route index element={<HomeModel />} />
+          <Route path="/model/:modelId" element={<HomeModelConfig />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="*" element={<NotFound />} />
         </Route>

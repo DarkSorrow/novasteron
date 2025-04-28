@@ -1,5 +1,17 @@
 {
   "nav": {
-    "home": "主页"
-  }
+    "home": "首页",
+    "addModel": "添加模型",
+    "ejectModel": "弹出模型",
+    "configureModel": "配置模型"
+  },
+  "model": {
+    "loading": "正在加载模型..."
+  },
+  "error": {
+    "general": "发生错误",
+    "noDetails": "目前没有可用的错误详情。",
+    "Model": "加载模型时发生错误"
+  },
+  "*": "{{message}}"
 }

@@ -20,8 +20,6 @@ export const ModelChat = () => {
   const isScrollAnchoredRef = useRef(false);
   const lastAnchorScrollTopRef = useRef<number>(0);
   const { t, i18n } = useTranslation();
-  const [isAppReady, setIsAppReady] = useState(false);
-  const appReadySentRef = useRef(false);
   // Signal that the app is ready to show once UI is fully loaded
 
   const scrollToBottom = useCallback(() => {
