@@ -32,10 +32,6 @@ export const deleteModel = async (id: string): Promise<void> => {
   return databaseService.deleteModel(id);
 };
 
-/**
- * Should migrate from electron-store to this
- * but probably move it after we rework on the header of the app
- */
 export const getSettings = async (): Promise<Settings> => {
   return databaseService.getPrompts('settings') || {
     theme: 'system',
@@ -46,3 +42,4 @@ export const getSettings = async (): Promise<Settings> => {
 export const setSettings = async (settings: Settings): Promise<void> => {
   return databaseService.setPrompts('settings', settings);
 };
+

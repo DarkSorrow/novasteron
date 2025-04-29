@@ -64,15 +64,7 @@ const AppWithProviders = () => {
 };
 
 // Get root element
-const rootElement = document.getElementById('root');
-if (!rootElement) throw new Error('Failed to find the root element');
-
-// Create root only if it doesn't exist
-let root = (window as any).__reactRoot;
-if (!root) {
-  root = ReactDOM.createRoot(rootElement);
-  (window as any).__reactRoot = root;
-}
+const root = ReactDOM.createRoot(document.getElementById('root')!);
 
 // Render our app
 root.render(

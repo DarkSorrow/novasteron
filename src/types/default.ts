@@ -1,24 +1,13 @@
-export interface ModelConfig {
-  n_gpu_layers: number;
-  n_threads: number;
-  n_batch: number;
-  n_context: number;
+
+export interface FileDialogOptions {
+  accept?: string;
+  message?: string;
+  title?: string;
+  filters?: { name: string; extensions: string[] }[];
+  buttonLabel?: string;
+  multiple?: boolean; // return multiple files
 }
 
-export interface Model {
-  id: string;
-  name: string;
-  imageUrl?: string;
-  description?: string;
-  fileURI?: string;
-  loraFileURI?: string;
-  config: ModelConfig;
-  apiKey?: string;
-  isCloud: boolean;
-  promptIDs: string[];
-  createdAt: Date;
-  updatedAt: Date;
-}
 
 export interface ChatHistory {
   id: string;
