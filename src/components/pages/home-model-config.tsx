@@ -3,6 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { FieldText } from '../atoms/field-text';
 import { FieldFile } from '../atoms/field-file';
@@ -12,6 +13,7 @@ import { modelSchema, Model } from '../../types/schema';
 import { getModels, addModel, updateModel } from '../../services/database';
 import { Loading } from '../molecules/loading';
 import { useAuth } from '../../providers/auth';
+import { Button } from '@mui/material';
 
 type FormData = Omit<Model, 'id' | 'createdAt' | 'updatedAt' | 'lastSyncedAt'>;
 
@@ -21,6 +23,7 @@ export const HomeModelConfig = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
 
   const form = useForm<FormData>({
     resolver: zodResolver(modelSchema),
@@ -31,24 +34,37 @@ export const HomeModelConfig = () => {
       imageURI: '',
       modelURI: '',
       loraURI: '',
-      /*config: {
-        n_gpu_layers: 0,
-        n_threads: 0,
-        n_batch: 0,
-        n_context: 0,
-      },*/
+    },
+  });
+
+  const mutation = useMutation({
+    mutationFn: async (data: FormData) => {
+      if (modelId && modelId !== 'new') {
+        return updateModel(modelId, data);
+      }
+      return addModel(data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['models'] });
+      navigate('/');
+    },
+    onError: (error: any) => {
+      setOpenSnackbar(true, 'error', t([`error.${error.message}`, "error.Unknown"]), {
+        name: form.getValues('name')
+      });
+      console.error('Error saving model:', error);
     },
   });
 
   useEffect(() => {
     const loadModel = async () => {
       if (modelId && modelId !== 'new') {
-        /*const models = await getModels();
+        const models = await getModels();
         const model = models.find(m => m.id === modelId);
         if (model) {
           const { id, createdAt, updatedAt, lastSyncedAt, ...formData } = model;
           form.reset(formData);
-        }*/
+        }
       }
       setIsLoading(false);
     };
@@ -56,18 +72,8 @@ export const HomeModelConfig = () => {
     loadModel();
   }, [modelId]);
 
-  const onSubmit: SubmitHandler<FormData> = async (data) => {
-    try {
-      if (modelId && modelId !== 'new') {
-        //await updateModel(modelId, data);
-      } else {
-        //await addModel(data);
-      }
-      navigate('/');
-    } catch (error: any) {
-      setOpenSnackbar(true, 'error', t([`error.${error.message}`, "error.Unknown"]), { name: data.name });
-      console.error('Error saving model:', error);
-    }
+  const onSubmit: SubmitHandler<FormData> = (data) => {
+    mutation.mutate(data);
   };
 
   if (isLoading) {
@@ -149,7 +155,18 @@ export const HomeModelConfig = () => {
           </AdvancedFields>
         */null}
         onSubmit={form.handleSubmit(onSubmit)}
-        submitLabel={modelId === 'new' ? t('create') : t('modify')}
+        submitButton={
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            disabled={mutation.isPending}
+            loading={mutation.isPending}
+            sx={{ mt: 2, alignSelf: 'flex-start' }}
+          >
+            {mutation.isPending ? t('saving') : (modelId === 'new' ? t('create') : t('modify'))}
+          </Button>
+        }
       />
     </FormProvider>
   );

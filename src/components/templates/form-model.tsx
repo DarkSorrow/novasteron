@@ -1,4 +1,4 @@
-import { Stack, Typography, Button, Box } from '@mui/material';
+import { Stack, Typography, Box } from '@mui/material';
 
 interface FormModelProps {
   title: string;
@@ -9,7 +9,7 @@ interface FormModelProps {
   loraSelection?: React.ReactNode;
   config: React.ReactNode;
   onSubmit: () => void;
-  submitLabel: string;
+  submitButton: React.ReactNode;
 }
 
 export const FormModel = ({
@@ -21,7 +21,7 @@ export const FormModel = ({
   loraSelection,
   config,
   onSubmit,
-  submitLabel
+  submitButton
 }: FormModelProps) => {
   return (
     <Box component="form" onSubmit={onSubmit} sx={{ p: 2 }}>
@@ -31,13 +31,17 @@ export const FormModel = ({
 
       <Stack direction="column" spacing={3}>
         {/* Image and Basic Info Section */}
-        <Stack direction="row" spacing={2} alignItems="flex-start">
-          {imageURI}
+        <Stack direction="row" spacing={2} alignItems="center">
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {imageURI}
+          </Box>
           <Stack direction="column" spacing={2} flex={1}>
             {name}
             {description}
           </Stack>
         </Stack>
+
+        {config}
 
         {/* Model and Lora Selection Section */}
         <Stack direction="column" spacing={2}>
@@ -45,18 +49,12 @@ export const FormModel = ({
           {loraSelection}
         </Stack>
 
-        {/* Advanced Configuration Section */}
         {config}
 
         {/* Submit Button */}
-        <Button
-          type="submit"
-          variant="contained"
-          color="primary"
-          sx={{ mt: 2, alignSelf: 'flex-start' }}
-        >
-          {submitLabel}
-        </Button>
+        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+          {submitButton}
+        </Box>
       </Stack>
     </Box>
   );

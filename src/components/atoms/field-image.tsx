@@ -1,40 +1,60 @@
 import { useFormContext, Controller } from 'react-hook-form';
-import { Button, Box, Paper } from '@mui/material';
+import { Box, Paper, TextField, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
 import { useTranslation } from "react-i18next";
 import ImageIcon from '@mui/icons-material/Image';
-import { useFileDialog } from '../../hooks/useFileDialog';
-import { FileDialogOptions } from '../../types/default';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { useState } from 'react';
 
 interface FieldImageProps {
   name: string;
   label?: string;
   size?: number;
   defaultValue?: string;
-  fileFilters?: FileDialogOptions;
-  onChange?: (filePath: string) => void;
+  onChange?: (url: string) => void;
 }
-//"filters": [{ "name": "Image File", "extensions": ["png", "jpg", "jpeg", "webp", "gif", "svg"] }],
+
 export const FieldImage = ({
   name,
   label,
   size = 200,
   defaultValue = '',
   onChange,
-  fileFilters,
   ...otherProps
 }: FieldImageProps) => {
   const {
     control,
     formState: { errors },
+    setValue,
+    watch,
   } = useFormContext();
   const { t } = useTranslation();
-  const openFileDialog = useFileDialog({
-    accept: fileFilters?.accept || 'image/*',
-    message: fileFilters?.message || t('image.message'),
-    title: fileFilters?.title || t('image.title'),
-    filters: fileFilters?.filters || [{ name: t('image.filter'), extensions: ['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg'] }],
-    buttonLabel: fileFilters?.buttonLabel || t('open'),
-  });
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [tempUrl, setTempUrl] = useState('');
+
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+    setTempUrl(watch(name) || '');
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleSave = () => {
+    setValue(name, tempUrl);
+    if (onChange) {
+      onChange(tempUrl);
+    }
+    handleCloseModal();
+  };
+
+  const handleDelete = () => {
+    setValue(name, '');
+    if (onChange) {
+      onChange('');
+    }
+    handleCloseModal();
+  };
 
   return (
     <Controller
@@ -42,60 +62,122 @@ export const FieldImage = ({
       name={name}
       defaultValue={defaultValue}
       render={({ field }) => (
-        <Paper
-          elevation={1}
-          sx={{
-            width: size,
-            height: size,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            overflow: 'hidden',
-            position: 'relative',
-            backgroundColor: 'background.default',
-            '&:hover': {
-              backgroundColor: 'action.hover',
-            },
-          }}
-          onClick={async () => {
-            const filePath = await openFileDialog();
-            if (filePath && typeof filePath === 'string') {
-              field.onChange(filePath);
-              if (onChange) {
-                onChange(filePath);
-              }
-            }
-          }}
-          {...otherProps}
-        >
-          {field.value ? (
-            <Box
-              component="img"
-              src={field.value}
-              alt={label || t('selectedImage')}
-              sx={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-              }}
-            />
-          ) : (
-            <Box
-              sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: 1,
-              }}
-            >
-              <ImageIcon sx={{ fontSize: 40, color: 'text.secondary' }} />
-              <Box sx={{ color: 'text.secondary', textAlign: 'center' }}>
-                {label || t('selectImage')}
+        <>
+          <Paper
+            elevation={1}
+            sx={{
+              width: size,
+              height: size,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              overflow: 'hidden',
+              position: 'relative',
+              backgroundColor: 'background.default',
+              '&:hover': {
+                backgroundColor: 'action.hover',
+              },
+            }}
+            onClick={handleOpenModal}
+            {...otherProps}
+          >
+            {field.value ? (
+              <Box
+                component="img"
+                src={field.value}
+                alt={label || t('selectedImage')}
+                sx={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                }}
+              />
+            ) : (
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 1,
+                }}
+              >
+                <ImageIcon sx={{ fontSize: 40, color: 'text.secondary' }} />
+                <Box sx={{ color: 'text.secondary', textAlign: 'center' }}>
+                  {label || t('selectImage')}
+                </Box>
               </Box>
-            </Box>
-          )}
-        </Paper>
+            )}
+          </Paper>
+
+          <Dialog
+            open={isModalOpen}
+            onClose={handleCloseModal}
+            maxWidth="sm"
+            fullWidth
+          >
+            <DialogTitle>{label || t('manageImage')}</DialogTitle>
+            <DialogContent>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
+                {tempUrl ? (
+                  <>
+                    <Box
+                      component="img"
+                      src={tempUrl}
+                      alt={label || t('previewImage')}
+                      sx={{
+                        width: '100%',
+                        maxHeight: 300,
+                        objectFit: 'contain',
+                        borderRadius: 1,
+                      }}
+                    />
+                    <TextField
+                      fullWidth
+                      label={t('imageUrl')}
+                      value={tempUrl}
+                      onChange={(e) => setTempUrl(e.target.value)}
+                      error={!!errors[name]}
+                      helperText={errors[name]?.message as string}
+                      placeholder="https://example.com/image.jpg"
+                    />
+                  </>
+                ) : (
+                  <TextField
+                    fullWidth
+                    label={t('imageUrl')}
+                    value={tempUrl}
+                    onChange={(e) => setTempUrl(e.target.value)}
+                    error={!!errors[name]}
+                    helperText={errors[name]?.message as string}
+                    placeholder="https://example.com/image.jpg"
+                  />
+                )}
+              </Box>
+            </DialogContent>
+            <DialogActions>
+              {tempUrl && (
+                <Button
+                  startIcon={<DeleteIcon />}
+                  onClick={handleDelete}
+                  color="error"
+                >
+                  {t('delete')}
+                </Button>
+              )}
+              <Button onClick={handleCloseModal}>
+                {t('cancel')}
+              </Button>
+              <Button
+                onClick={handleSave}
+                variant="contained"
+                disabled={!tempUrl}
+              >
+                {t('save')}
+              </Button>
+            </DialogActions>
+          </Dialog>
+        </>
       )}
     />
   );
