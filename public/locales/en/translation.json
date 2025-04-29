@@ -11,7 +11,8 @@
   "error": {
     "general": "An error occurred",
     "noDetails": "No details available on the error at the moment.",
-    "Model": "An error occurred while loading the model"
+    "Model": "An error occurred while loading the model",
+    "NotFound": "The item was not found"
   },
   "*": "{{message}}"
 }

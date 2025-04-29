@@ -1,7 +1,7 @@
-import { useLayoutEffect, useState } from 'react';
+import { useLayoutEffect, useState, MouseEvent } from 'react';
 import { Base } from '../templates/base';
 import { useTranslation } from 'react-i18next';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 
 import { HeaderNovastera } from '../molecules/header-novastera';
 import { HeaderModel } from '../molecules/header-model';
@@ -181,6 +181,7 @@ export const TEST_MODELS: Model[] = [
 export const Home = () => {
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
   const [models, setModels] = useState<Model[]>(TEST_MODELS);
+  const navigate = useNavigate();
 
   useLayoutEffect(() => {
     // remove the splash screen after dom load
@@ -190,11 +191,15 @@ export const Home = () => {
     }
   }, []);
 
-  const handleModelClick = (model: Model) => {
-    setSelectedModel(model.id);
+  const handleModelClick = (event: MouseEvent<HTMLButtonElement>) => {
+    if (event.currentTarget.dataset && event.currentTarget.dataset['id']) {
+      console.log('model to load', event.currentTarget.dataset['id']);
+      navigate('/')
+    }
   };
 
   const handleAddModelClick = () => {
+    navigate('/configuration/new');
     setSelectedModel(null);
   };
 
@@ -203,6 +208,7 @@ export const Home = () => {
   };
 
   const handleConfigureModelClick = () => {
+    navigate(`/`);
     setSelectedModel(null);
   };
 

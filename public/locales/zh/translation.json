@@ -11,7 +11,8 @@
   "error": {
     "general": "发生错误",
     "noDetails": "目前没有可用的错误详情。",
-    "Model": "加载模型时发生错误"
+    "Model": "加载模型时发生错误",
+    "NotFound": "未找到该项目"
   },
   "*": "{{message}}"
 }

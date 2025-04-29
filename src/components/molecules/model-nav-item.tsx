@@ -1,3 +1,4 @@
+import { MouseEvent } from 'react';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 import { styled } from '@mui/material/styles';
 import { ButtonModel } from '../atoms/button-model';
@@ -5,9 +6,10 @@ import { ButtonModel } from '../atoms/button-model';
 interface ModelNavItemProps {
   imageUrl?: string;
   name: string;
-  onClick: () => void;
+  onClick: (event: MouseEvent<HTMLButtonElement>) => void;
   isActive: boolean;
   position?: 'left' | 'right';
+  modelID: string;
 }
 
 const ButtonImage = styled('img')({
@@ -16,9 +18,9 @@ const ButtonImage = styled('img')({
   objectFit: 'cover',
 });
 
-export const ModelNavItem = ({ imageUrl, name, onClick, isActive, position }: ModelNavItemProps) => {
+export const ModelNavItem = ({ imageUrl, name, onClick, isActive, position, modelID }: ModelNavItemProps) => {
   return (
-    <ButtonModel name={name} onClick={onClick} isActive={isActive} position={position}>
+    <ButtonModel name={name} onClick={onClick} isActive={isActive} position={position} modelID={modelID}>
       {imageUrl ? (
         <ButtonImage src={imageUrl} alt="Model" />
       ) : (
