@@ -65,12 +65,26 @@ export class ElectronLlmRpc {
 
     this.sendCurrentLlmState = this.sendCurrentLlmState.bind(this);
 
-    llmState.createChangeListener(this.sendCurrentLlmState);
-    this.sendCurrentLlmState();
+    // Add error handling for state updates
+    const safeSendState = async () => {
+      try {
+        await this.sendCurrentLlmState();
+      } catch (error) {
+        console.error('Error sending LLM state:', error);
+      }
+    };
+
+    llmState.createChangeListener(safeSendState);
+    safeSendState();
   }
 
-  public sendCurrentLlmState() {
-    this.rendererLlmRpc.updateState(llmState.state);
+  public async sendCurrentLlmState() {
+    try {
+      await this.rendererLlmRpc.updateState(llmState.state);
+    } catch (error) {
+      console.error('Error in sendCurrentLlmState:', error);
+      throw error;
+    }
   }
 }
 

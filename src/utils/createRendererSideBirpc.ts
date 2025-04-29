@@ -16,6 +16,14 @@ export function createRendererSideBirpc<
       }),
     serialize: value => JSON.stringify(value),
     deserialize: value => JSON.parse(value),
-    timeout: 30000, // Increase timeout to 30 seconds
+    timeout: 60000, // Increase timeout to 60 seconds
+    onError: (error, method) => {
+      console.error(`[birpc] Error in ${method}:`, error);
+      return true; // Prevent throwing the error
+    },
+    onFunctionError: (error, method) => {
+      console.error(`[birpc] Function error in ${method}:`, error);
+      return true; // Prevent throwing the error
+    },
   });
 }

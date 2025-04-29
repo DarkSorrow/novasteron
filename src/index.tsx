@@ -1,11 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import '@fontsource-variable/inter/opsz-italic.css';
-import { App } from './App/App.tsx';
-import './index.css';
 import i18n from './utils/i18n';
 import { I18nextProvider } from 'react-i18next';
-
 import { useMemo, Suspense } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -13,10 +9,27 @@ import { CacheProvider } from '@emotion/react';
 import createCache from '@emotion/cache';
 import { prefixer } from 'stylis';
 import rtlPlugin from 'stylis-plugin-rtl';
-
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { IndexRouting } from './index-routing';
 import { getDesignTokens } from './styles/theme';
 import { AuthProvider, useAuth } from './providers/auth';
+
+import '@fontsource-variable/inter/opsz-italic.css';
+import './index.css';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes
+      retry: 2, // Reduce retries to 1
+      retryDelay: 1000, // Fixed delay of 1 second
+      refetchOnWindowFocus: false, // Don't refetch on window focus
+      refetchOnMount: false, // Don't refetch on mount
+      refetchOnReconnect: false, // Don't refetch on reconnect
+    },
+  },
+});
 
 // Create caches for RTL and LTR text direction
 const cacheRtl = createCache({
@@ -55,11 +68,13 @@ export const AppWithTheme = () => {
 // App wrapped with providers
 const AppWithProviders = () => {
   return (
-    <I18nextProvider i18n={i18n}>
-      <AuthProvider>
-        <AppWithTheme />
-      </AuthProvider>
-    </I18nextProvider>
+    <QueryClientProvider client={queryClient}>
+      <I18nextProvider i18n={i18n}>
+        <AuthProvider>
+          <AppWithTheme />
+        </AuthProvider>
+      </I18nextProvider>
+    </QueryClientProvider>
   );
 };
 

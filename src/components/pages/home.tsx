@@ -1,7 +1,8 @@
-import { useLayoutEffect, useState, MouseEvent, useEffect } from 'react';
+import { useLayoutEffect, useState, MouseEvent } from 'react';
 import { Base } from '../templates/base';
 import { useTranslation } from 'react-i18next';
 import { Outlet, useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 
 import { getModels } from '../../services/database';
 import { HeaderNovastera } from '../molecules/header-novastera';
@@ -26,18 +27,15 @@ import { Model } from '../../types/schema';
 
 export const Home = () => {
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
-  const [models, setModels] = useState<Model[]>([]);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const init = async () => {
-      const models = await getModels();
-      console.log('models', models);
-      setModels(models);
-    };
-    console.log('init home and loading models');
-    init();
-  }, []);
+  const { data: models = [], isLoading, error } = useQuery({
+    queryKey: ['models'],
+    queryFn: getModels,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 1,
+    retryDelay: 1000,
+  });
 
   useLayoutEffect(() => {
     // Signal that the app is ready to show once UI is fully loaded
@@ -46,6 +44,11 @@ export const Home = () => {
       window.splashScreen.appReady();
     }
   }, []);
+
+  if (error) {
+    console.error('Error loading models:', error);
+    // You might want to show an error UI here
+  }
 
   const handleModelClick = (event: MouseEvent<HTMLButtonElement>) => {
     if (event.currentTarget.dataset && event.currentTarget.dataset['id']) {

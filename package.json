@@ -29,6 +29,7 @@
     "@mui/icons-material": "^7.0.2",
     "@mui/material": "^7.0.2",
     "@mui/x-date-pickers": "^8.1.0",
+    "@tanstack/react-query": "^5.74.9",
     "birpc": "^2.2.0",
     "classnames": "^2.5.1",
     "electron-store": "^10.0.1",
