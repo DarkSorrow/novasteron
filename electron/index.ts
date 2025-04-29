@@ -2,6 +2,7 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { app, shell, BrowserWindow, ipcMain, Tray, Menu, nativeTheme } from 'electron';
 import { registerLlmRpc } from './rpc/llmRpc.ts';
+import { registerFileDialogRpc } from './rpc/fileDialogRpc.ts';
 import fs from 'node:fs';
 import * as i18nBackend from 'i18next-electron-fs-backend';
 import i18NextMainConfig from './localization/i18n.mainconfig.ts';
@@ -168,7 +169,7 @@ function createWindow(theme: 'dark' | 'light' | 'system', language: string) {
   win.webContents.openDevTools();
 
   registerLlmRpc(win);
-
+  registerFileDialogRpc(win);
   // Listen for native theme updates and notify renderer
   nativeTheme.on('updated', () => {
     if (win && !win.isDestroyed()) {
@@ -290,10 +291,12 @@ app.whenReady().then(() => {
     nativeTheme.themeSource = theme;
   }
 
-  // First, create and show splash screen
+  // First create the main window (but don't show it yet)
+  createWindow(theme, language);
+
+  // Then create and show splash screen
   createSplashScreen();
 
-  // Then initialize the app window (but don't show it yet)
-  createWindow(theme, language);
+  // Finally create tray
   createTray(theme, language, i18NextMainConfig);
 });

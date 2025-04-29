@@ -7,6 +7,15 @@ import { electronLlmRpc } from '../rpc/llmRpc';
 import { DEFAULT_LANGUAGE, RTL_LANG } from '../utils/constants';
 
 type direction = 'ltr' | 'rtl';
+type SeverityType = 'error' | 'warning' | 'info' | 'success';
+
+export interface Openi18nOption {
+  open: boolean;
+  severity: SeverityType;
+  i18nMessage: string;
+  i18nObject?: any;
+}
+
 interface AuthState {
   status: 'idle' | 'signOut' | 'signIn';
   userToken: string | null;
@@ -21,6 +30,7 @@ interface AuthState {
   models: any[];
   isLoading: boolean;
   modelError: Error | null;
+  snackbar: Openi18nOption;
 }
 
 type AuthAction =
@@ -48,13 +58,15 @@ type AuthAction =
   | { type: 'SIGN_OUT' }
   | { type: 'LOAD_MODEL'; modelId: string }
   | { type: 'SET_MODELS'; models: any[] }
-  | { type: 'SET_MODEL_ERROR'; error: Error | null };
+  | { type: 'SET_MODEL_ERROR'; error: Error | null }
+  | { type: 'SET_MUTATION'; snackbar: Openi18nOption };
 
 interface AuthContextActions {
   signIn: (accessToken: any) => void;
   signOut: () => void;
   loadModel: (modelId: string) => Promise<void>;
   addNewModel: () => Promise<void>;
+  setOpenSnackbar: (open: boolean, severity: SeverityType, i18nMessage: string, i18nObject?: any) => void;
 }
 
 interface AuthContextType extends AuthState, AuthContextActions {}
@@ -76,10 +88,12 @@ const AuthContext = createContext<AuthContextType>({
   models: [],
   isLoading: false,
   modelError: null,
+  snackbar: { open: false, severity: 'info', i18nMessage: '' },
   signIn: () => {},
   signOut: () => {},
   loadModel: async () => {},
   addNewModel: async () => {},
+  setOpenSnackbar: () => {},
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -99,6 +113,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     models: [],
     isLoading: false,
     modelError: null,
+    snackbar: { open: false, severity: 'info', i18nMessage: '' },
   });
 
   const handleLanguageChange = useCallback(
@@ -238,6 +253,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       },
       loadModel,
       addNewModel,
+      setOpenSnackbar: async (open: boolean, severity: SeverityType, i18nMessage: string, i18nObject?: any) => {
+        dispatch({
+          type: 'SET_MUTATION',
+          snackbar: {
+            open,
+            severity,
+            i18nMessage,
+            i18nObject,
+          }
+        });
+      },
     }),
     [loadModel, addNewModel]
   );
@@ -304,6 +330,11 @@ const AuthReducer = (prevState: AuthState, action: AuthAction): AuthState => {
         ...prevState,
         modelError: action.error,
         isLoading: false,
+      };
+    case 'SET_MUTATION':
+      return {
+        ...prevState,
+        snackbar: action.snackbar,
       };
     default:
       return prevState;

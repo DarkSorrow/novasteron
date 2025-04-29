@@ -15,12 +15,21 @@ export const modelConfigSchema = object({
 });
 
 export const modelSchema = dbInfoSchema.extend({
-  name: string(),
+  name: string().min(1, { message: 'FieldRequired' }),
   description: string(),
-  imageURI: string(),
-  modelURI: string(),
-  loraURI: string(),
+  isCloud: boolean(),
+  imageURI: string().optional(),
+  modelURI: string().min(1, { message: 'FieldRequired' }),
+  loraURI: string().optional(),
   config: modelConfigSchema.optional(),
 });
 
+export const promptSchema = dbInfoSchema.extend({
+  name: string().min(1, { message: 'FieldRequired' }),
+  systemPrompt: string().min(1, { message: 'FieldRequired' }),
+  tags: array(string()).optional(),
+  modelIDs: array(string()).optional(),
+});
+
 export type Model = TypeOf<typeof modelSchema>;
+

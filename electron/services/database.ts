@@ -2,7 +2,6 @@
  * Should think of a way to easily import encryption key and allow its use here
  * Cloud based key too with asymmetric encryption?
  */
-import { app } from 'electron';
 import crypto from 'crypto';
 import { Model } from '../../src/types/schema';
 
@@ -25,12 +24,13 @@ export class DatabaseService {
   private encryptionKey: string | null = null;
   private dbName = 'novastera-db';
   private dbVersion = 1;
+  private initializationPromise: Promise<void> | null = null;
 
   private constructor(config: DatabaseConfig = {}) {
     if (config.encryptionKey) {
       this.encryptionKey = config.encryptionKey;
     }
-    this.initializeDatabase();
+    this.initializationPromise = this.initializeDatabase();
   }
 
   public static getInstance(config?: DatabaseConfig): DatabaseService {
@@ -40,16 +40,22 @@ export class DatabaseService {
     return DatabaseService.instance;
   }
 
-  private initializeDatabase(): Promise<void> {
+  private async initializeDatabase(): Promise<void> {
+    if (this.db) {
+      return;
+    }
+
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(this.dbName, this.dbVersion);
 
       request.onerror = () => {
+        console.error('Database initialization failed:', request.error);
         reject(request.error);
       };
 
       request.onsuccess = () => {
         this.db = request.result;
+        console.log('Database initialized successfully');
         resolve();
       };
 
@@ -63,7 +69,9 @@ export class DatabaseService {
 
         // Create settings store
         if (!db.objectStoreNames.contains('prompts')) {
-          db.createObjectStore('prompts', { keyPath: 'id' });
+          const promptsStore = db.createObjectStore('prompts', { keyPath: 'id' });
+          promptsStore.createIndex('tags', 'tags', { multiEntry: true });
+          promptsStore.createIndex('modelIDs', 'modelIDs', { multiEntry: true });
         }
 
         // Create chat history store
@@ -78,9 +86,17 @@ export class DatabaseService {
   // Generic database operations
   private async getStore(storeName: string, mode: IDBTransactionMode = 'readonly'): Promise<IDBObjectStore> {
     if (!this.db) {
-      await this.initializeDatabase();
+      if (!this.initializationPromise) {
+        this.initializationPromise = this.initializeDatabase();
+      }
+      await this.initializationPromise;
     }
-    const transaction = this.db!.transaction(storeName, mode);
+
+    if (!this.db) {
+      throw new Error('Database not initialized');
+    }
+
+    const transaction = this.db.transaction(storeName, mode);
     return transaction.objectStore(storeName);
   }
 
@@ -231,3 +247,4 @@ export class DatabaseService {
   // The existing functions will be used directly
   // No need to add duplicate implementations
 }
+

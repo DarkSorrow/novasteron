@@ -18,7 +18,7 @@ i18next.use(Backend).init({
     loadPath: prependPath + '/electron/localization/locales/{{lng}}/{{ns}}.json',
     addPath: prependPath + '/electron/localization/locales/{{lng}}/{{ns}}.missing.json',
   },
-  debug: true, // Enable debug to see more information
+  debug: false, // Enable debug to see more information
   defaultNS: 'translation',
   saveMissing: true, // Save missing translations to help identify issues
   lng: whitelist.getLanguageName(electronStore.get('language', app.getLocale()) as string),

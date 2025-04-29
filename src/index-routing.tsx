@@ -14,8 +14,8 @@ export const IndexRouting = () => {
     <Router>
       <Routes>
         <Route path="/" element={<Home />}>
-          <Route index element={<HomeModelConfig />} />
-          <Route path="/model/:modelId" element={<HomeModel />} />
+          <Route index element={<HomeModel />} />
+          <Route path="/model/:modelId" element={<HomeModelConfig />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="*" element={<NotFound />} />
         </Route>

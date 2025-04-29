@@ -19,7 +19,7 @@ i18n
       loadPath: '/locales/{{lng}}/{{ns}}.json',
     },
     fallbackLng: DEFAULT_LANGUAGE,
-    debug: process.env.NODE_ENV !== 'production',
+    debug: false,
     supportedLngs: SUPPORTED_LANGUAGES,
     load: 'currentOnly',
   });

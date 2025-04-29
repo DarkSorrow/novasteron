@@ -2,7 +2,7 @@ import { MouseEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, styled } from '@mui/material';
 
-import { Model } from "../../types/default";
+import { Model } from "../../types/schema";
 import { ModelNavAdd } from '../molecules/model-nav-add';
 import { ModelNavItem } from '../molecules/model-nav-item';
 import { USER_PROFILE_HEIGHT } from '../../utils/constants';
@@ -85,12 +85,12 @@ export const NavigationModel = ({
         <Divider />
       </FixedSection>
       <ModelsList>
-        {models.map((model) => (
+        {models.map((model) => model.id && (
           <ModelNavItem
             key={model.id}
             isActive={selectedModel === model.id}
             name={model.name}
-            imageUrl={model.imageUrl}
+            imageUrl={model.imageURI}
             position={position}
             onClick={onModelClick}
             modelID={model.id}
