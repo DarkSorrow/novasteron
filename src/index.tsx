@@ -96,9 +96,9 @@ const AppWithProviders = () => {
       <I18nextProvider i18n={i18n}>
         <AuthProvider>
           <AppWithTheme />
+          <ReactQueryDevtools initialIsOpen={true} />
         </AuthProvider>
       </I18nextProvider>
-      <ReactQueryDevtools initialIsOpen={true} />
     </QueryClientProvider>
   );
 };

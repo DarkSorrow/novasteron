@@ -46,6 +46,28 @@ export class ElectronLlmRpc {
         await llmFunctions.chatSession.createChatSession();
       }
     },
+    async loadSelectedModel(modelFilePath: string) {
+      // This is the state that we will need to stop using later
+      llmState.state = {
+        ...llmState.state,
+        selectedModelFilePath: path.resolve(modelFilePath),
+        chatSession: {
+          loaded: false,
+          generatingResult: false,
+          simplifiedChat: [],
+          draftPrompt: {
+            prompt: llmState.state.chatSession.draftPrompt.prompt,
+            completion: '',
+          },
+        },
+      };
+      if (!llmState.state.llama.loaded) await llmFunctions.loadLlama();
+
+      await llmFunctions.loadModel(llmState.state.selectedModelFilePath!);
+      await llmFunctions.createContext();
+      await llmFunctions.createContextSequence();
+      await llmFunctions.chatSession.createChatSession();
+    },
     getState() {
       return llmState.state;
     },

@@ -9,7 +9,7 @@ import { USER_PROFILE_HEIGHT } from '../../utils/constants';
 import { useAuth } from '../../providers/auth';
 
 interface NavigationModelProps {
-  selectedModel: string | null;
+  selectedModel: Model | null;
   models: Model[];
   onModelClick: (event: MouseEvent<HTMLButtonElement>) => void;
   onAddModelClick: (event: MouseEvent<HTMLButtonElement>) => void;
@@ -88,7 +88,7 @@ export const NavigationModel = ({
         {models.map((model) => model.id && (
           <ModelNavItem
             key={model.id}
-            isActive={selectedModel === model.id}
+            isActive={selectedModel?.id === model.id}
             name={model.name}
             imageUrl={model.imageURI}
             position={position}

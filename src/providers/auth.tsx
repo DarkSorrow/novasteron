@@ -5,6 +5,7 @@ import { llmState } from '../state/llmState';
 import { electronLlmRpc } from '../rpc/llmRpc';
 import { database } from '../services/database';
 import { DEFAULT_LANGUAGE, RTL_LANG } from '../utils/constants';
+import { Model } from '../types/schema';
 
 type direction = 'ltr' | 'rtl';
 type SeverityType = 'error' | 'warning' | 'info' | 'success';
@@ -26,7 +27,7 @@ interface AuthState {
   langDir: direction;
   openMenu: boolean;
   // Model related state
-  selectedModel: string | null;
+  selectedModel: Model | null;
   models: any[];
   isLoading: boolean;
   modelError: Error | null;
@@ -58,8 +59,7 @@ type AuthAction =
       theme: string;
     }
   | { type: 'SIGN_OUT' }
-  | { type: 'LOAD_MODEL'; modelId: string }
-  | { type: 'SET_MODELS'; models: any[] }
+  | { type: 'LOAD_MODEL'; model: Model }
   | { type: 'SET_MODEL_ERROR'; error: Error | null }
   | { type: 'SET_MUTATION'; snackbar: Openi18nOption }
   | { type: 'SET_DATABASE_ERROR'; error: Error | null };
@@ -67,8 +67,7 @@ type AuthAction =
 interface AuthContextActions {
   signIn: (accessToken: any) => void;
   signOut: () => void;
-  loadModel: (modelId: string) => Promise<void>;
-  addNewModel: () => Promise<void>;
+  loadModel: (model: Model) => Promise<void>;
   setOpenSnackbar: (open: boolean, severity: SeverityType, i18nMessage: string, i18nObject?: any) => void;
 }
 
@@ -78,7 +77,6 @@ interface AuthContextType extends AuthState, AuthContextActions {
 
 // Constants for localStorage keys
 const STORAGE_TOKEN = 'auth_token';
-const STORAGE_MODELS = 'user_models';
 
 const AuthContext = createContext<AuthContextType>({
   status: 'idle',
@@ -91,21 +89,19 @@ const AuthContext = createContext<AuthContextType>({
   openMenu: true,
   selectedModel: null,
   models: [],
-  isLoading: false,
-  modelError: null,
+  isLoading: false,//maybe remove
+  modelError: null,//maybe remove
   snackbar: { open: false, severity: 'info', i18nMessage: '' },
   databaseError: null,
   signIn: () => {},
   signOut: () => {},
   loadModel: async () => {},
-  addNewModel: async () => {},
   setOpenSnackbar: () => {},
   database: database,
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const { i18n } = useTranslation();
-  const llmExternalState = useExternalState(llmState);
 
   const [state, dispatch] = useReducer(AuthReducer, {
     status: 'idle',
@@ -210,25 +206,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     void initSettingsAndListeners();
   }, []);
 
-  const loadModel = useCallback(async (modelId: string) => {
-    try {
-      dispatch({ type: 'LOAD_MODEL', modelId });
-      await electronLlmRpc.selectModelFileAndLoad();
-    } catch (error) {
-      console.warn('Failed to load model:', error);
-      dispatch({ type: 'SET_MODEL_ERROR', error: error as Error });
-    }
-  }, [state.models]);
-
-  const addNewModel = useCallback(async () => {
-    try {
-      await electronLlmRpc.selectModelFileAndLoad();
-      const updatedModels = [...state.models];
-      dispatch({ type: 'SET_MODELS', models: updatedModels });
-    } catch (error) {
-      console.warn('Failed to add model:', error);
-      dispatch({ type: 'SET_MODEL_ERROR', error: error as Error });
-    }
+  const loadModel = useCallback(async (model: Model) => {
+    await electronLlmRpc.loadSelectedModel(model.modelURI);
+    dispatch({ type: 'LOAD_MODEL', model });
   }, [state.models]);
 
   const authActions: AuthContextActions = useMemo(
@@ -260,7 +240,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         dispatch({ type: 'SIGN_OUT' });
       },
       loadModel,
-      addNewModel,
       setOpenSnackbar: async (open: boolean, severity: SeverityType, i18nMessage: string, i18nObject?: any) => {
         dispatch({
           type: 'SET_MUTATION',
@@ -273,7 +252,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         });
       },
     }),
-    [loadModel, addNewModel]
+    [loadModel]
   );
 
   return (
@@ -322,16 +301,8 @@ const AuthReducer = (prevState: AuthState, action: AuthAction): AuthState => {
     case 'LOAD_MODEL':
       return {
         ...prevState,
-        selectedModel: action.modelId,
-        isLoading: true,
+        selectedModel: action.model,
         modelError: null,
-      };
-    case 'SET_MODELS':
-      localStorage.setItem(STORAGE_MODELS, JSON.stringify(action.models));
-      return {
-        ...prevState,
-        models: action.models,
-        isLoading: false,
       };
     case 'SET_MODEL_ERROR':
       return {

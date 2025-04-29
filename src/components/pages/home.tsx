@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useLayoutEffect, useState, MouseEvent } from 'react';
 import { Base } from '../templates/base';
 import { useTranslation } from 'react-i18next';
@@ -10,6 +10,10 @@ import { HeaderModel } from '../molecules/header-model';
 import { NavigationModel } from '../organisms/navigation-model';
 import { Model } from '../../types/schema';
 import { useAuth } from '../../providers/auth';
+import { Loading } from '../molecules/loading';
+//import {electronLlmRpc} from "../../electron/rpc/llmRpc.ts";
+import { llmState } from '../../state/llmState';
+import { useExternalState } from '../../hooks/useExternalState';
 
 /**
  * Home page
@@ -25,14 +29,24 @@ import { useAuth } from '../../providers/auth';
  * @returns
  *
  */
-
+/*
+reset the chat
+<button
+          className="resetChatButton"
+          disabled={onResetChatClick == null}
+          onClick={onResetChatClick}
+        >
+          <DeleteIconSVG className="icon" />
+        </button>
+*/
 export const Home = () => {
-  const { database } = useAuth();
-  const [selectedModel, setSelectedModel] = useState<string | null>(null);
+  const { database, selectedModel, loadModel } = useAuth();
+
+  const [modelLoading, setModelLoading] = useState<boolean>(false);
   const navigate = useNavigate();
   const { t } = useTranslation();
 
-  const { data: models = [], isLoading, error } = useQuery<Model[]>({
+  const { data: models = [], isLoading: modelsLoading, error: modelsError } = useQuery<Model[]>({
     queryKey: ['models'],
     queryFn: () => database.getModels(),
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -48,37 +62,46 @@ export const Home = () => {
     }
   }, []);
 
-  if (error) {
-    console.error('Error loading models:', error);
-    return <div>Error loading models: {error.message}</div>;
+  if (modelsLoading) {
+    return <Loading />;
   }
 
-  if (isLoading) {
-    return <div>Loading...</div>;
+  if (modelsError) {
+    console.error('Error loading models:', modelsError);
+    return <div>Error loading models: {modelsError.message}</div>;
   }
-
-  const handleModelClick = (event: MouseEvent<HTMLButtonElement>) => {
+  console.log('selectedModel', selectedModel);
+  const handleModelClick = async (event: MouseEvent<HTMLButtonElement>) => {
     if (event.currentTarget.dataset && event.currentTarget.dataset['id']) {
       const modelId = event.currentTarget.dataset['id'];
-      console.log('model to load', modelId);
-      setSelectedModel(modelId);
-      navigate('/');
+      if (modelId !== selectedModel?.id) {
+        const model = models.find(model => model.id === modelId);
+        if (model) {
+          try {
+            setModelLoading(true);
+            await loadModel(model);
+          } catch (error) {
+            console.error('Error loading model:', error);
+          } finally {
+            setModelLoading(false);
+          }
+        }
+        navigate('/');
+      }
     }
   };
 
   const handleAddModelClick = () => {
     navigate('/model/new');
-    setSelectedModel(null);
   };
 
   const handleEjectModelClick = () => {
-    setSelectedModel(null);
     navigate('/');
   };
 
   const handleConfigureModelClick = () => {
     if (selectedModel) {
-      navigate(`/model/${selectedModel}`);
+      navigate(`/model/${selectedModel.id}`);
     }
   };
 
@@ -86,7 +109,7 @@ export const Home = () => {
     <Base
       header={selectedModel ? (
         <HeaderModel
-          modelName={selectedModel}
+          modelName={selectedModel.name}
           onEject={handleEjectModelClick}
           onConfigure={handleConfigureModelClick}
         />
@@ -102,7 +125,7 @@ export const Home = () => {
         />
       }
     >
-      <Outlet />
+      {modelLoading ? <Loading /> : <Outlet />}
     </Base>
   );
 };

@@ -17,7 +17,7 @@ import { Loading } from '../molecules/loading';
 type FormData = Omit<Model, 'id' | 'createdAt' | 'updatedAt' | 'lastSyncedAt'>;
 
 export const HomeModelConfig = () => {
-  const { database, setOpenSnackbar } = useAuth();
+  const { database, setOpenSnackbar, loadModel } = useAuth();
   const { modelId } = useParams();
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -66,7 +66,9 @@ export const HomeModelConfig = () => {
           await database.updateModel(modelId, data);
           return modelId;
         }
-        return await database.addModel(data);
+        const modelID = await database.addModel(data);
+        await loadModel({...data, id: modelID});
+        return modelID;
       } catch (error) {
         console.error('Error saving model:', error);
         throw error;

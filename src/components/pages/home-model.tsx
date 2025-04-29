@@ -5,13 +5,17 @@ import { useAuth } from '../../providers/auth';
 import { Loading } from '../molecules/loading';
 import { HomeError } from '../organisms/home-error';
 import { parseError } from '../../utils/function';
+import { useEffect } from 'react';
 
 export const HomeModel = () => {
   const { t } = useTranslation();
-  const { isLoading, modelError } = useAuth();
+  const { isLoading, modelError, selectedModel } = useAuth();
   console.log({
     isLoading,
-    modelError});
+    modelError,
+    selectedModel,
+  });
+
   if (isLoading) {
     return <Loading message={t('model.loading')} />;
   }
