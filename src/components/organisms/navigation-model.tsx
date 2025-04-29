@@ -28,8 +28,7 @@ const ModelsList = styled(Box)({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
-  gap: '4px',
-  padding: '8px 0',
+  gap: '8px',
   overflowY: 'auto',
   overflowX: 'hidden',
   // Hide scrollbar for Chrome, Safari and Opera
@@ -61,7 +60,6 @@ const FixedSection = styled(Box)({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
-  padding: '8px 0',
 });
 
 export const NavigationModel = ({

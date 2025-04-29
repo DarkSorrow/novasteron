@@ -13,8 +13,9 @@ interface ModelNavItemProps {
 }
 
 const ButtonImage = styled('img')({
-  width: '100%',
-  height: '100%',
+  width: 42,
+  height: 42,
+  borderRadius: '16px',
   objectFit: 'cover',
 });
 

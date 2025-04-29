@@ -160,7 +160,7 @@ function createWindow(theme: 'dark' | 'light' | 'system', language: string) {
       // For debugging
       devTools: true,
     },
-    width: 1000,
+    width: 1280,
     height: 700,
     show: false, // Initially hidden until React app signals it's ready
   });
