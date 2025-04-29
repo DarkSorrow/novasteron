@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useExternalState } from '../hooks/useExternalState';
 import { llmState } from '../state/llmState';
 import { electronLlmRpc } from '../rpc/llmRpc';
-
+import { database } from '../services/database';
 import { DEFAULT_LANGUAGE, RTL_LANG } from '../utils/constants';
 
 type direction = 'ltr' | 'rtl';
@@ -31,6 +31,8 @@ interface AuthState {
   isLoading: boolean;
   modelError: Error | null;
   snackbar: Openi18nOption;
+  // Database and connection state
+  databaseError: Error | null;
 }
 
 type AuthAction =
@@ -59,7 +61,8 @@ type AuthAction =
   | { type: 'LOAD_MODEL'; modelId: string }
   | { type: 'SET_MODELS'; models: any[] }
   | { type: 'SET_MODEL_ERROR'; error: Error | null }
-  | { type: 'SET_MUTATION'; snackbar: Openi18nOption };
+  | { type: 'SET_MUTATION'; snackbar: Openi18nOption }
+  | { type: 'SET_DATABASE_ERROR'; error: Error | null };
 
 interface AuthContextActions {
   signIn: (accessToken: any) => void;
@@ -69,7 +72,9 @@ interface AuthContextActions {
   setOpenSnackbar: (open: boolean, severity: SeverityType, i18nMessage: string, i18nObject?: any) => void;
 }
 
-interface AuthContextType extends AuthState, AuthContextActions {}
+interface AuthContextType extends AuthState, AuthContextActions {
+  database: typeof database;
+}
 
 // Constants for localStorage keys
 const STORAGE_TOKEN = 'auth_token';
@@ -89,11 +94,13 @@ const AuthContext = createContext<AuthContextType>({
   isLoading: false,
   modelError: null,
   snackbar: { open: false, severity: 'info', i18nMessage: '' },
+  databaseError: null,
   signIn: () => {},
   signOut: () => {},
   loadModel: async () => {},
   addNewModel: async () => {},
   setOpenSnackbar: () => {},
+  database: database,
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -114,6 +121,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     isLoading: false,
     modelError: null,
     snackbar: { open: false, severity: 'info', i18nMessage: '' },
+    databaseError: null,
   });
 
   const handleLanguageChange = useCallback(
@@ -269,7 +277,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   );
 
   return (
-    <AuthContext.Provider value={{ ...state, ...authActions }}>
+    <AuthContext.Provider value={{ ...state, ...authActions, database }}>
       {children}
     </AuthContext.Provider>
   );
@@ -335,6 +343,11 @@ const AuthReducer = (prevState: AuthState, action: AuthAction): AuthState => {
       return {
         ...prevState,
         snackbar: action.snackbar,
+      };
+    case 'SET_DATABASE_ERROR':
+      return {
+        ...prevState,
+        databaseError: action.error,
       };
     default:
       return prevState;

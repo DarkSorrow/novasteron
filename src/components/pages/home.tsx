@@ -1,14 +1,15 @@
+import React from 'react';
 import { useLayoutEffect, useState, MouseEvent } from 'react';
 import { Base } from '../templates/base';
 import { useTranslation } from 'react-i18next';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 
-import { getModels } from '../../services/database';
 import { HeaderNovastera } from '../molecules/header-novastera';
 import { HeaderModel } from '../molecules/header-model';
 import { NavigationModel } from '../organisms/navigation-model';
 import { Model } from '../../types/schema';
+import { useAuth } from '../../providers/auth';
 
 /**
  * Home page
@@ -26,12 +27,14 @@ import { Model } from '../../types/schema';
  */
 
 export const Home = () => {
+  const { database } = useAuth();
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
-  const { data: models = [], isLoading, error } = useQuery({
+  const { data: models = [], isLoading, error } = useQuery<Model[]>({
     queryKey: ['models'],
-    queryFn: getModels,
+    queryFn: () => database.getModels(),
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 1,
     retryDelay: 1000,
@@ -47,7 +50,11 @@ export const Home = () => {
 
   if (error) {
     console.error('Error loading models:', error);
-    // You might want to show an error UI here
+    return <div>Error loading models: {error.message}</div>;
+  }
+
+  if (isLoading) {
+    return <div>Loading...</div>;
   }
 
   const handleModelClick = (event: MouseEvent<HTMLButtonElement>) => {
@@ -86,7 +93,8 @@ export const Home = () => {
       ) : (
         <HeaderNovastera />
       )}
-      sideBar={<NavigationModel
+      sideBar={
+        <NavigationModel
           selectedModel={selectedModel}
           models={models}
           onModelClick={handleModelClick}

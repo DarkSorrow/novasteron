@@ -1,29 +1,37 @@
 import { useForm, FormProvider, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { FieldText } from '../atoms/field-text';
 import { FieldFile } from '../atoms/field-file';
 import { FieldImage } from '../atoms/field-image';
 import { FormModel } from '../templates/form-model';
 import { modelSchema, Model } from '../../types/schema';
-import { getModels, addModel, updateModel } from '../../services/database';
-import { Loading } from '../molecules/loading';
 import { useAuth } from '../../providers/auth';
 import { Button } from '@mui/material';
+import { Loading } from '../molecules/loading';
 
 type FormData = Omit<Model, 'id' | 'createdAt' | 'updatedAt' | 'lastSyncedAt'>;
 
 export const HomeModelConfig = () => {
-  const { setOpenSnackbar } = useAuth();
+  const { database, setOpenSnackbar } = useAuth();
   const { modelId } = useParams();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const [isLoading, setIsLoading] = useState(true);
   const queryClient = useQueryClient();
+
+  // Fetch model data if we're editing
+  const { data: existingModel, isLoading } = useQuery({
+    queryKey: ['model', { id: modelId }],
+    queryFn: async () => {
+      const models = await database.getModels();
+      return models.find(m => m.id === modelId) || null;
+    },
+    enabled: modelId !== 'new'
+  });
 
   const form = useForm<FormData>({
     resolver: zodResolver(modelSchema),
@@ -37,40 +45,44 @@ export const HomeModelConfig = () => {
     },
   });
 
+  // Set form values when existing model is loaded
+  useEffect(() => {
+    if (existingModel) {
+      form.reset({
+        name: existingModel.name,
+        description: existingModel.description,
+        isCloud: existingModel.isCloud,
+        imageURI: existingModel.imageURI,
+        modelURI: existingModel.modelURI,
+        loraURI: existingModel.loraURI,
+      });
+    }
+  }, [existingModel]);
+
   const mutation = useMutation({
     mutationFn: async (data: FormData) => {
-      if (modelId && modelId !== 'new') {
-        return updateModel(modelId, data);
+      try {
+        if (modelId && modelId !== 'new') {
+          await database.updateModel(modelId, data);
+          return modelId;
+        }
+        return await database.addModel(data);
+      } catch (error) {
+        console.error('Error saving model:', error);
+        throw error;
       }
-      return addModel(data);
     },
-    onSuccess: () => {
+    onSuccess: (id) => {
+      // Invalidate both the specific model and the models list
+      queryClient.invalidateQueries({ queryKey: ['model', { id }] });
       queryClient.invalidateQueries({ queryKey: ['models'] });
       navigate('/');
     },
-    onError: (error: any) => {
-      setOpenSnackbar(true, 'error', t([`error.${error.message}`, "error.Unknown"]), {
-        name: form.getValues('name')
-      });
+    onError: (error: Error) => {
       console.error('Error saving model:', error);
+      setOpenSnackbar(true, 'error', t([`error.${error.message}`, "error.Unknown"]));
     },
   });
-
-  useEffect(() => {
-    const loadModel = async () => {
-      if (modelId && modelId !== 'new') {
-        const models = await getModels();
-        const model = models.find(m => m.id === modelId);
-        if (model) {
-          const { id, createdAt, updatedAt, lastSyncedAt, ...formData } = model;
-          form.reset(formData);
-        }
-      }
-      setIsLoading(false);
-    };
-
-    loadModel();
-  }, [modelId]);
 
   const onSubmit: SubmitHandler<FormData> = (data) => {
     mutation.mutate(data);
@@ -79,7 +91,6 @@ export const HomeModelConfig = () => {
   if (isLoading) {
     return <Loading />;
   }
-
   return (
     <FormProvider {...form}>
       <FormModel

@@ -4,6 +4,7 @@ import i18n from './utils/i18n';
 import { I18nextProvider } from 'react-i18next';
 import { useMemo, Suspense } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import CssBaseline from '@mui/material/CssBaseline';
 import { CacheProvider } from '@emotion/react';
 import createCache from '@emotion/cache';
@@ -13,21 +14,44 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { IndexRouting } from './index-routing';
 import { getDesignTokens } from './styles/theme';
 import { AuthProvider, useAuth } from './providers/auth';
-
+import { database } from './services/database';
 import '@fontsource-variable/inter/opsz-italic.css';
 import './index.css';
+
+// Initialize database before app renders
+const initDatabase = async () => {
+  try {
+    await database.init();
+    console.log('Database initialized successfully');
+  } catch (error) {
+    console.error('Failed to initialize database:', error);
+    // We could show a user-friendly error message here
+    // or implement a retry mechanism
+  }
+};
+
+// Initialize database immediately
+initDatabase();
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 5 * 60 * 1000, // 5 minutes
       gcTime: 10 * 60 * 1000, // 10 minutes
-      retry: 2, // Reduce retries to 1
+      retry: 1, // Single retry attempt
       retryDelay: 1000, // Fixed delay of 1 second
-      refetchOnWindowFocus: false, // Don't refetch on window focus
-      refetchOnMount: false, // Don't refetch on mount
-      refetchOnReconnect: false, // Don't refetch on reconnect
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
     },
+    mutations: {
+      retry: 1,
+      retryDelay: 1000,
+      onError: (error) => {
+        console.error('Mutation error:', error);
+        // We could show a user-friendly error message here
+      }
+    }
   },
 });
 
@@ -74,6 +98,7 @@ const AppWithProviders = () => {
           <AppWithTheme />
         </AuthProvider>
       </I18nextProvider>
+      <ReactQueryDevtools initialIsOpen={true} />
     </QueryClientProvider>
   );
 };

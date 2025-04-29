@@ -31,5 +31,13 @@ export const promptSchema = dbInfoSchema.extend({
   modelIDs: array(string()).optional(),
 });
 
-export type Model = TypeOf<typeof modelSchema>;
+export const chatMessageSchema = dbInfoSchema.extend({
+  promptID: string().min(1, { message: 'FieldRequired' }),
+  chatID: number(),
+  role: string().min(1, { message: 'FieldRequired' }),
+  content: string().min(1, { message: 'FieldRequired' }),
+});
 
+export type Model = TypeOf<typeof modelSchema>;
+export type Prompt = TypeOf<typeof promptSchema>;
+export type ChatMessage = TypeOf<typeof chatMessageSchema>;

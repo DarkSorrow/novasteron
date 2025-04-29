@@ -18,7 +18,7 @@ export function createElectronSideBirpc<
       }),
     serialize: value => JSON.stringify(value),
     deserialize: value => JSON.parse(value),
-    timeout: 60000, // Increase timeout to 60 seconds
+    timeout: 10000, // Increase timeout to 60 seconds
     onError: (error, method) => {
       console.error(`[birpc] Error in ${method}:`, error);
       return true; // Prevent throwing the error
