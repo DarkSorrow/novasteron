@@ -1,3 +1,4 @@
+import { MouseEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, styled } from '@mui/material';
 
@@ -10,8 +11,8 @@ import { useAuth } from '../../providers/auth';
 interface NavigationModelProps {
   selectedModel: string | null;
   models: Model[];
-  onModelClick: (model: Model) => void;
-  onAddModelClick: () => void;
+  onModelClick: (event: MouseEvent<HTMLButtonElement>) => void;
+  onAddModelClick: (event: MouseEvent<HTMLButtonElement>) => void;
 }
 
 const NavigationContainer = styled(Box)(({ theme }) => ({
@@ -91,7 +92,8 @@ export const NavigationModel = ({
             name={model.name}
             imageUrl={model.imageUrl}
             position={position}
-            onClick={() => onModelClick(model)}
+            onClick={onModelClick}
+            modelID={model.id}
           />
         ))}
       </ModelsList>

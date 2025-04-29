@@ -1,8 +1,22 @@
+/**
+ * Should think of a way to easily import encryption key and allow its use here
+ * Cloud based key too with asymmetric encryption?
+ */
 import { app } from 'electron';
 import crypto from 'crypto';
+import { Model } from '../../src/types/schema';
 
 interface DatabaseConfig {
   encryptionKey?: string;
+}
+
+export interface DatabaseFunctions {
+  getModels(): Promise<Model[]>;
+  addModel(model: Omit<Model, 'id' | 'createdAt'>): Promise<string>;
+  updateModel(id: string, model: Partial<Omit<Model, 'id' | 'createdAt'>>): Promise<void>;
+  deleteModel(id: string): Promise<void>;
+  getPrompts(key: string): Promise<any>;
+  setPrompts(key: string, value: any): Promise<void>;
 }
 
 export class DatabaseService {
@@ -44,21 +58,18 @@ export class DatabaseService {
 
         // Create models store
         if (!db.objectStoreNames.contains('models')) {
-          const modelsStore = db.createObjectStore('models', { keyPath: 'id', autoIncrement: true });
-          modelsStore.createIndex('name', 'name', { unique: true });
-          modelsStore.createIndex('type', 'type', { unique: false });
+          db.createObjectStore('models', { keyPath: 'id' });
         }
 
         // Create settings store
-        if (!db.objectStoreNames.contains('settings')) {
-          db.createObjectStore('settings', { keyPath: 'key' });
+        if (!db.objectStoreNames.contains('prompts')) {
+          db.createObjectStore('prompts', { keyPath: 'id' });
         }
 
         // Create chat history store
         if (!db.objectStoreNames.contains('chatHistory')) {
-          const chatStore = db.createObjectStore('chatHistory', { keyPath: 'id', autoIncrement: true });
-          chatStore.createIndex('modelId', 'modelId', { unique: false });
-          chatStore.createIndex('timestamp', 'timestamp', { unique: false });
+          const chatStore = db.createObjectStore('chatHistory', { keyPath: 'id' });
+          chatStore.createIndex('promptId', 'promptId', { unique: false });
         }
       };
     });
@@ -74,19 +85,55 @@ export class DatabaseService {
   }
 
   // Models operations
-  public async addModel(model: { name: string; path: string; type: string }): Promise<number> {
+  public async addModel(model: Omit<Model, 'id' | 'createdAt'>): Promise<string> {
     const store = await this.getStore('models', 'readwrite');
+    const id = crypto.randomUUID();
     return new Promise((resolve, reject) => {
       const request = store.add({
         ...model,
+        id,
         createdAt: new Date().toISOString()
       });
-      request.onsuccess = () => resolve(request.result as number);
+      request.onsuccess = () => resolve(id);
       request.onerror = () => reject(request.error);
     });
   }
 
-  public async getModels(): Promise<any[]> {
+  public async updateModel(id: string, model: Partial<Omit<Model, 'id' | 'createdAt'>>): Promise<void> {
+    const store = await this.getStore('models', 'readwrite');
+    return new Promise((resolve, reject) => {
+      const getRequest = store.get(id);
+      getRequest.onsuccess = () => {
+        const existingModel = getRequest.result;
+        if (!existingModel) {
+          reject(new Error('NotFound'));
+          return;
+        }
+        const updatedModel = {
+          ...existingModel,
+          ...model,
+          id, // Ensure ID stays the same
+          createdAt: existingModel.createdAt, // Preserve creation date
+          updatedAt: new Date().toISOString()
+        };
+        const updateRequest = store.put(updatedModel);
+        updateRequest.onsuccess = () => resolve();
+        updateRequest.onerror = () => reject(updateRequest.error);
+      };
+      getRequest.onerror = () => reject(getRequest.error);
+    });
+  }
+
+  public async deleteModel(id: string): Promise<void> {
+    const store = await this.getStore('models', 'readwrite');
+    return new Promise((resolve, reject) => {
+      const request = store.delete(id);
+      request.onsuccess = () => resolve();
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  public async getModels(): Promise<Model[]> {
     const store = await this.getStore('models');
     return new Promise((resolve, reject) => {
       const request = store.getAll();
@@ -130,9 +177,9 @@ export class DatabaseService {
     });
   }
 
-  // Settings operations
-  public async setSetting(key: string, value: any): Promise<void> {
-    const store = await this.getStore('settings', 'readwrite');
+  // Prompts operations
+  public async setPrompts(key: string, value: any): Promise<void> {
+    const store = await this.getStore('prompts', 'readwrite');
     return new Promise((resolve, reject) => {
       const request = store.put({ key, value });
       request.onsuccess = () => resolve();
@@ -140,8 +187,8 @@ export class DatabaseService {
     });
   }
 
-  public async getSetting(key: string): Promise<any> {
-    const store = await this.getStore('settings');
+  public async getPrompts(key: string): Promise<any> {
+    const store = await this.getStore('prompts');
     return new Promise((resolve, reject) => {
       const request = store.get(key);
       request.onsuccess = () => resolve(request.result?.value);
@@ -180,4 +227,7 @@ export class DatabaseService {
       this.db = null;
     }
   }
+
+  // The existing functions will be used directly
+  // No need to add duplicate implementations
 }

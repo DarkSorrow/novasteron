@@ -1,14 +1,16 @@
+import { MouseEvent } from 'react';
 import { ButtonBase, Tooltip } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
 import { useAuth } from '../../providers/auth';
 
 export interface ButtonModelProps {
-  onClick?: () => void;
+  onClick?: (event: MouseEvent<HTMLButtonElement>) => void;
   isActive?: boolean;
   name?: string;
   children: React.ReactNode;
   position?: 'left' | 'right';
+  modelID: string;
 }
 
 const StyledButton = styled(ButtonBase)(({ theme }) => ({
@@ -48,7 +50,7 @@ const ButtonContent = styled('div')({
   borderRadius: 'inherit',
 });
 
-export const ButtonModel = ({ onClick, isActive = false, name, children, position }: ButtonModelProps) => {
+export const ButtonModel = ({ onClick, isActive = false, name, children, position, modelID }: ButtonModelProps) => {
   const { langDir } = useAuth();
   const ButtonComponent = isActive ? ActiveButton : StyledButton;
 
@@ -58,7 +60,7 @@ export const ButtonModel = ({ onClick, isActive = false, name, children, positio
       placement={position}
       arrow
     >
-      <ButtonComponent onClick={onClick}>
+      <ButtonComponent data-id={modelID} onClick={onClick}>
         <ButtonContent>
           {children}
         </ButtonContent>

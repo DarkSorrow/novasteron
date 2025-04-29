@@ -11,7 +11,8 @@
   "error": {
     "general": "Une erreur est survenue",
     "noDetails": "Aucun détail disponible sur l'erreur pour le moment.",
-    "Model": "Une erreur est survenue lors du chargement du modèle"
+    "Model": "Une erreur est survenue lors du chargement du modèle",
+    "NotFound": "L'élément n'a pas été trouvé"
   },
   "*": "{{message}}"
 }
